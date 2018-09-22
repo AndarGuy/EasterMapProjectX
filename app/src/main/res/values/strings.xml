@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Help</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="profile_name">Fomenko Mikhail</string>
+    <string name="press_to_edit">Press to edit</string>
+    <string name="map">Map</string>
+    <string name="my_finds">My finds</string>
+    <string name="shop">Shop</string>
+    <string name="account_manage">Account management</string>
+    <string name="settings">Settings</string>
+    <string name="bug_report">Report a bug</string>
+    <string name="pen">Pen</string>
+    <string name="star">Star</string>
+    <string name="account">Account</string>
+    <string name="bug">Bug</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
