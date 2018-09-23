@@ -14,8 +14,4 @@
     <string name="star">Star</string>
     <string name="account">Account</string>
     <string name="bug">Bug</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_maps">Map</string>
 </resources>
