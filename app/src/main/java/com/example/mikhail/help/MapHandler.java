@@ -10,7 +10,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,13 +64,12 @@ public class MapHandler implements OnMapReadyCallback {
                             Log.d(TAG, "onSuccess: location find");
                             onUserLocationFind(location);
                         } else {
-                            Log.e(TAG, "onSuccess: location is null");
-                            //get current location
+                            Log.e(TAG, "onSuccess: location is null 0_0");
                         }
                     }
                     else {
                         Log.e(TAG, "onComplete: task is failtured");
-                        //to be or not to be ...
+                        Toast.makeText(context, R.string.something_wrong, Toast.LENGTH_LONG);
                     }
                 }
             });
@@ -89,6 +87,7 @@ public class MapHandler implements OnMapReadyCallback {
     private void mapSetup() {
         Log.d(TAG, "mapSetup: setup starting");
         mMap.getUiSettings().setRotateGesturesEnabled(false);
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -96,7 +95,6 @@ public class MapHandler implements OnMapReadyCallback {
         mMap.setMapStyle(new MapStyleOptions(context.getResources().getString(R.string.map_style)));
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             mMap.setMyLocationEnabled(true);
-        Log.d(TAG, "mapSetup: setup complete");
     }
 
     GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {

@@ -14,4 +14,6 @@
     <string name="star">Star</string>
     <string name="account">Account</string>
     <string name="bug">Bug</string>
+    <string name="something_wrong">Oops! Something Wrong</string>
+    <string name="search">Search</string>
 </resources>
