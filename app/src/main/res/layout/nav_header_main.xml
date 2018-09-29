@@ -7,7 +7,7 @@
     android:orientation="horizontal">
 
     <LinearLayout
-        android:id="@+id/profile_image_layout"
+        android:id="@+id/profileImageLayout"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginLeft="16dp"
@@ -15,7 +15,7 @@
         android:layout_gravity="center">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
+            android:id="@+id/profileImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/profile"
@@ -27,7 +27,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/name_edit_layout"
+        android:id="@+id/nameEditLayout"
         android:layout_gravity="center"
         android:orientation="vertical">
 
@@ -43,7 +43,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/info_edit_layout"
+            android:id="@+id/infoEditLayout"
             android:orientation="horizontal">
 
             <TextView

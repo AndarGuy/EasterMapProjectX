@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/finds_layout"
+        android:id="@+id/findsLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">
@@ -31,7 +31,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/shop_layout"
+        android:id="@+id/shopLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">
@@ -56,7 +56,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/account_manage_layout"
+        android:id="@+id/accountManageLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">
@@ -81,7 +81,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/settings_layout"
+        android:id="@+id/settingsLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">
@@ -106,7 +106,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/bug_report_layout"
+        android:id="@+id/bugReportLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal">

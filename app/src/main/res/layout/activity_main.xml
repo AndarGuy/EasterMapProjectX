@@ -7,24 +7,22 @@
     tools:context=".MainActivity">
 
     <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawer_layout"
+        android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <include layout="@layout/content_main"></include>
 
-        <!-- Layout to contain contents of main body of screen (drawer will slide over this) -->
         <FrameLayout
-            android:id="@+id/content_frame"
+            android:id="@+id/contentFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
         </FrameLayout>
 
-        <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
-        <include layout="@layout/drawer_body">
-
-        </include>
+        <include
+            android:id="@+id/drawerFrame"
+            layout="@layout/drawer_body_main"/>
 
     </android.support.v4.widget.DrawerLayout>
 

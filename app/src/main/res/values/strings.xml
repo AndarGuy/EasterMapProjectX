@@ -16,4 +16,15 @@
     <string name="bug">Bug</string>
     <string name="something_wrong">Oops! Something Wrong</string>
     <string name="search">Search</string>
+    <string name="login">Login</string>
+    <string name="name">Name</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="enter">Enter</string>
+    <string name="nickname">Nickname</string>
+    <string name="sign_in">Sign in</string>
+    <string name="warning">Warning</string>
+    <string name="no_sign_in_continue">If you continue without an account, many features of the application will be unavailable!</string>
+    <string name="scontinue">Continue</string>
+
 </resources>
