@@ -8,8 +8,74 @@
         android:id="@+id/fabBackGround"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        android:alpha="0" />
+        android:alpha="0"
+        android:background="@color/black" />
+
+    <FrameLayout
+        android:id="@+id/fabPlaceSide"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="28dp"
+        android:layout_marginEnd="80dp"
+        android:alpha="0"
+        android:background="@drawable/mini_fab_bg"
+        android:backgroundTint="@color/white">
+
+        <TextView
+            style="@style/Text.Items"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/place" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fabEventSide"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="28dp"
+        android:layout_marginEnd="80dp"
+        android:alpha="0"
+        android:background="@drawable/mini_fab_bg"
+        android:backgroundTint="@color/white">
+
+        <TextView
+            style="@style/Text.Items"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/event" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fabTextSide"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="28dp"
+        android:layout_marginEnd="80dp"
+        android:alpha="0"
+        android:background="@drawable/mini_fab_bg"
+        android:backgroundTint="@color/white">
+
+        <TextView
+            style="@style/Text.Items"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/text" />
+
+    </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabPlace"
@@ -17,7 +83,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
-        android:src="@android:drawable/ic_menu_compass"
+        android:src="@drawable/ic_hills"
+        android:tint="@color/grey3E"
         app:backgroundTint="@color/white"
         app:fabSize="mini" />
 
@@ -27,6 +94,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
+        android:src="@drawable/ic_flag"
+        android:tint="@color/grey3E"
         app:backgroundTint="@color/white"
         app:fabSize="mini" />
 
@@ -36,7 +105,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
-        android:src="@android:drawable/ic_menu_share"
+        android:src="@drawable/ic_text"
+        android:tint="@color/grey3E"
         app:backgroundTint="@color/white"
         app:fabSize="mini" />
 

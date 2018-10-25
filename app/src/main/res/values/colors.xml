@@ -11,6 +11,9 @@
     <color name="black">#000000</color>
     <color name="greyE0">#E0E0E0</color>
     <color name="greyE9">#9e9e9e</color>
+    <color name="grey3E">#3e3e3e</color>
     <color name="grayBD">#BDBDBD</color>
     <color name="black50p">#80000000</color>
+    <color name="white70p">#B3FFFFFF</color>
+    <color name="dark_gray">#4d4d4d</color>
 </resources>

@@ -1,10 +1,12 @@
 package com.example.mikhail.help;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -28,7 +31,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    MainListener listener = new MainListener();
+    MainListener listener;
+    MapHandler mapHandler = new MapHandler(this);
 
     private static final String TAG = "MainActivity";
     private static final int ERROR_DIALOG_REQUEST = 9001;
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle barDrawerToggle;
     private LinearLayout nameEditLayout, profileImageContainer, findsLayout, shopLayout, accountManageLayout, settingsLayout, bugReportLayout;
-    private FrameLayout fabBackGround;
+    private FrameLayout fabBackGround, fabPlaceSide, fabEventSide, fabTextSide;
     private FloatingActionButton fab, fabPlace, fabText, fabEvent;
 
     public boolean mLocationPermissionGranted = false;
@@ -57,7 +61,25 @@ public class MainActivity extends AppCompatActivity {
             mapLoad();
         }
 
+        /* new Thread() {
+            @Override
+            public void run() {
+                if (!isNetworkConnected(MainActivity.this)) {
+                    openInternetConnection(MainActivity.this);
+                    MainActivity.this.finish();
+                }
+                else {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {}
+                    run();
+                }
+            }
+        }.start(); */
+
         elementsLoad();
+
+        listener = new MainListener(fab, fabPlace, fabEvent, fabText, fabBackGround, fabPlaceSide, fabEventSide, fabTextSide);
 
         toolbarLoad();
 
@@ -65,6 +87,15 @@ public class MainActivity extends AppCompatActivity {
 
         userAuthorize();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (listener.isFabMenuOpen) {
+            listener.fabMenuClose();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void elementsLoad() {
@@ -82,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
         fabPlace = findViewById(R.id.fabPlace);
         fabText = findViewById(R.id.fabText);
         fabBackGround = findViewById(R.id.fabBackGround);
+        fabPlaceSide = findViewById(R.id.fabPlaceSide);
+        fabEventSide = findViewById(R.id.fabEventSide);
+        fabTextSide = findViewById(R.id.fabTextSide);
     }
 
     private void elementsSetListeners() {
@@ -94,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
         accountManageLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         settingsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         bugReportLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        fab.setOnClickListener(listener.onFabClick(fab, fabPlace, fabEvent, fabText, fabBackGround));
-        fabPlace.setOnClickListener(listener.onMiniFabClick());
-        fabEvent.setOnClickListener(listener.onMiniFabClick());
-        fabText.setOnClickListener(listener.onMiniFabClick());
+        fab.setOnClickListener(listener.onFabClick());
+        fabPlace.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
+        fabEvent.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
+        fabText.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
     }
 
     //-------------TOOLBAR-------------
@@ -163,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     Log.d(TAG, "onRequestPermissionsResult: permission granted");
-                    //mapReload();
                     mLocationPermissionGranted = true;
                 }
         }
@@ -189,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "mapLoad: map loading");
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(new MapHandler(this));
+        mapFragment.getMapAsync(mapHandler);
 
         Log.d(TAG, "mapLoad: map loaded");
 
@@ -226,11 +259,20 @@ public class MainActivity extends AppCompatActivity {
             if (isUserLogged()) {
                 return true;
             } else {
-                Intent intent = new Intent(MainActivity.this, AuthorizationActivity.class);
-                startActivity(intent);
+                openAuthorizationActivity(this);
             }
         }
         return false;
+    }
+
+    public void openAuthorizationActivity(Context context) {
+        Intent intent = new Intent(context, AuthorizationActivity.class);
+        startActivityForResult(intent, RESULT_OK);
+    }
+
+    public void openInternetConnection(Context context) {
+        Intent intent = new Intent(context, InternetConnection.class);
+        startActivityForResult(intent, RESULT_OK);
     }
 
     public boolean isServerOK() {
@@ -240,5 +282,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean isUserLogged() {
         return true;
     }
+
+    //APPEARANCE
+
+    public static boolean isNetworkConnected(Context context) {
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isConnected();
+
+    }
+
 
 }

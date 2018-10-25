@@ -36,6 +36,7 @@ public class MapHandler implements OnMapReadyCallback {
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Context context;
+    public Location location;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -43,45 +44,51 @@ public class MapHandler implements OnMapReadyCallback {
 
         mapSetup();
 
-        getUserLastLocation();
+        new Thread() {
+            @Override
+            public void run() {
+                getUserLastLocation();
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                run();
+            }
+        }.start();
 
     }
 
-    private void getUserLastLocation() {
-        Log.d(TAG, "getUserLocation: calls");
+    public void getUserLastLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "getUserLastLocation: task starting");
             mFusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
-                    Log.d(TAG, "onComplete: task completed");
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "onComplete: task is succesful");
                         Location location = task.getResult();
                         if (location != null) {
-                            Log.d(TAG, "onSuccess: location find");
                             onUserLocationFind(location);
                         } else {
-                            Log.e(TAG, "onSuccess: location is null 0_0");
                         }
-                    }
-                    else {
+                    } else {
                         Log.e(TAG, "onComplete: task is failtured");
                         Toast.makeText(context, R.string.something_wrong, Toast.LENGTH_LONG);
                     }
                 }
             });
-        }
-        else {
-            Log.e(TAG, "getUserLastLocation: has not permissions");
-            //do something
+        } else {
         }
     }
 
     private void onUserLocationFind(Location location) {
-        moveCameraToLocation(location, DEFAULT_ZOOM, DEFAULT_MOVE);
+        if (this.location == null) moveCameraToLocation(location, DEFAULT_ZOOM, DEFAULT_MOVE);
+        this.location = location;
+    }
+
+    public LatLng getCameraPosition() {
+        return mMap.getCameraPosition().target;
     }
 
     private void mapSetup() {
@@ -101,7 +108,8 @@ public class MapHandler implements OnMapReadyCallback {
         @Override
         public void onMyLocationClick(@NonNull Location location) {
             float currentZoom = mMap.getCameraPosition().zoom;
-            if (currentZoom < DEFAULT_ZOOM) moveCameraToLocation(location, DEFAULT_ZOOM, ANIMATED_MOVE);
+            if (currentZoom < DEFAULT_ZOOM)
+                moveCameraToLocation(location, DEFAULT_ZOOM, ANIMATED_MOVE);
             else moveCameraToLocation(location, currentZoom, ANIMATED_MOVE);
         }
     };

@@ -39,7 +39,7 @@
         <item name="android:singleLine">true</item>
     </style>
 
-    <style name="Button" parent="Text.Button"/>
+    <style name="Button" parent="Text.Button" />
 
     <style name="Button.Flat" parent="Base.Widget.AppCompat.Button.Borderless">
         <item name="android:textColor">@color/grayBD</item>
@@ -50,7 +50,13 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="Text"/>
+    <style name="Text" />
+
+    <style name="Text.Items">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/grey3E</item>
+        <item name="android:fontFamily">@font/roboto</item>
+    </style>
 
     <style name="Text.Button" parent="Text">
         <item name="android:fontFamily">@font/roboto_medium</item>
@@ -63,10 +69,35 @@
         <item name="android:textColor">@color/textColorDarkPrimary</item>
     </style>
 
+    <style name="Text.CardTitle" parent="Text">
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Text.CardSubtitle" parent="Text">
+        <item name="android:fontFamily">@font/roboto</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Text.NameTitle" parent="Text">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/roboto_bold</item>
+    </style>
+
+    <style name="Text.NameTitle.Dark" parent="Text.NameTitle">
+        <item name="android:textColor">@color/dark_gray</item>
+    </style>
+
     <style name="Text.LightTitle" parent="Text">
         <item name="android:fontFamily">@font/roboto_light</item>
         <item name="android:textSize">42sp</item>
         <item name="android:textColor">@color/textColorDarkPrimary</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
