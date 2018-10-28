@@ -34,23 +34,35 @@
     <string name="add_place">Add place</string>
     <string name="position">Position</string>
     <string name="type">Type</string>
+    <string name="size">Size</string>
     <string name="data">Data</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
-    
+
+    <string name="add_event">Add event</string>
+    <string name="meters">meters</string>
+
     <string name="add_photo">Add Photo</string>
     <string name="press_to_take_photo">Press to take photo</string>
     <string name="name_of_place">Name of place</string>
     <string name="description">Description</string>
+    <string name="tags">Tags (#fun #super... etc)</string>
     <string name="need_from_to_symbols">Name length must been from %from% to %to% characters!</string>
     <string name="unknown_symbols">Unknown symbols!</string>
+
+    <string-array name="add_place_hints">
+        <item>Choose accurate location</item>
+        <item>Choose type of adding item</item>
+        <item>Fill information of adding item</item>
+    </string-array>
+
 
     <string name="no_internet_connection">Sorry, no Internet connection!</string>
     <string name="wait">Wait</string>
     <string name="success">Success</string>
     <string name="no_connection">No connection</string>
     <string name="can_not_get_position">We can\'t\ get your position</string>
-    
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_internet_connection">InternetConnection</string>
 
@@ -63,5 +75,12 @@
         <item>Epic building</item>
         <item>Easter egg</item>
     </string-array>
+
+    <string-array name="types_events">
+        <item>Small</item>
+        <item>Big</item>
+        <item>Huge</item>
+    </string-array>
+    <string name="title_activity_add_event">AddEventActivity</string>
 
 </resources>

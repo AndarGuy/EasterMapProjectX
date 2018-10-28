@@ -1,8 +1,9 @@
-package com.example.mikhail.help.add;
+package com.example.mikhail.help.additions;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -10,10 +11,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.mikhail.help.R;
-import com.example.mikhail.help.utils.CustomViewPager;
-import com.example.mikhail.help.utils.ViewPagerAdapter;
+import com.example.mikhail.help.things.CustomViewPager;
+import com.example.mikhail.help.things.ViewPagerAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
 public class AddPlaceActivity extends AppCompatActivity implements PositionFragment.OnPositionFragmentDataListener, TypeFragment.OnTypeFragmentDataListener, DataFragment.OnDataFragmentDataListener {
@@ -23,6 +25,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     private Button buttonBack, buttonNext;
     private TabLayout tabLayout;
     private CustomViewPager viewPager;
+    private TextView hint;
 
     private LatLng position;
     private String name, description, code;
@@ -35,6 +38,8 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
             R.drawable.ic_egg_easter};
 
     private String[] mThumbCodes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
+
+    private String[] hints;
 
 
     @Override
@@ -69,6 +74,30 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
         elementsLoad();
 
+        hints = getResources().getStringArray(R.array.add_place_hints);
+
+        hint.setText(hints[0]);
+        hint.animate().setDuration(6000).alpha(0);
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                hint.animate().setDuration(6000).alpha(0);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                hint.setText(hints[position]);
+                hint.animate().cancel();
+                hint.setAlpha(1);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         setupViewPager(viewPager);
 
         tabLayout.setupWithViewPager(viewPager);
@@ -85,6 +114,8 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
         tabLayout = findViewById(R.id.tabHost);
 
         viewPager = findViewById(R.id.viewPager);
+
+        hint = findViewById(R.id.hint);
 
         buttonBack = findViewById(R.id.buttonBack);
         buttonNext = findViewById(R.id.buttonNext);
@@ -169,6 +200,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     private void sendTypeBundles(Bundle bundle, TypeFragment fragment) {
         bundle.putStringArray(fragment.KEY_THUMB_CODES, mThumbCodes);
         bundle.putIntArray(fragment.KEY_THUMB_IDS, mThumbIds);
+        bundle.putStringArray(fragment.KEY_THUMB_NAMES, getResources().getStringArray(R.array.types_places));
 
     }
 

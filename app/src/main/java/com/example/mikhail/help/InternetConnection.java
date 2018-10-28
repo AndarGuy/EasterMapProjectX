@@ -12,13 +12,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.mikhail.help.utils.Utils;
+import com.example.mikhail.help.things.Utilities;
 
 public class InternetConnection extends AppCompatActivity {
 
     private static final String TAG = "InternetConnection";
 
-    Utils utils = new Utils();
+    Utilities utils = new Utilities();
 
     ImageView retry;
     TextView info;

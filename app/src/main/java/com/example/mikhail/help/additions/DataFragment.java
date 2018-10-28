@@ -1,4 +1,4 @@
-package com.example.mikhail.help.add;
+package com.example.mikhail.help.additions;
 
 
 import android.content.Context;

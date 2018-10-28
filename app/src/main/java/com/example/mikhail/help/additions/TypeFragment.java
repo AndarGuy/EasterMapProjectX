@@ -1,4 +1,4 @@
-package com.example.mikhail.help.add;
+package com.example.mikhail.help.additions;
 
 
 import android.content.Context;
@@ -14,20 +14,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mikhail.help.R;
-import com.example.mikhail.help.utils.DataAdapter;
+import com.example.mikhail.help.things.DataAdapter;
 
 
 public class TypeFragment extends Fragment {
 
     private static final String TAG = "TypeFragment";
 
-    public static final String KEY_THUMB_IDS = "ids", KEY_THUMB_CODES = "codes";
+    public static final String
+            KEY_THUMB_IDS = "ids",
+            KEY_THUMB_CODES = "codes",
+            KEY_THUMB_NAMES = "names";
 
     private TextView mSelectText;
     private ImageView mSelectImage;
 
     private int[] mThumbIds;
     private String[] mThumbCodes;
+    private String[] mThumbNames;
 
     public TypeFragment() {
 
@@ -36,6 +40,7 @@ public class TypeFragment extends Fragment {
     private void getBundles() {
         mThumbIds = getArguments().getIntArray(KEY_THUMB_IDS);
         mThumbCodes = getArguments().getStringArray(KEY_THUMB_CODES);
+        mThumbNames = getArguments().getStringArray(KEY_THUMB_NAMES);
     }
 
 
@@ -47,7 +52,7 @@ public class TypeFragment extends Fragment {
         getBundles();
 
         GridView gridview = v.findViewById(R.id.gridview);
-        gridview.setAdapter(new DataAdapter(this.getContext(), mThumbIds, getResources().getStringArray(R.array.types_places)));
+        gridview.setAdapter(new DataAdapter(this.getContext(), mThumbIds, mThumbNames));
 
         gridview.setOnItemClickListener(gridviewOnItemClickListener);
 

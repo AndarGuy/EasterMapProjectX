@@ -1,4 +1,4 @@
-package com.example.mikhail.help.utils;
+package com.example.mikhail.help.things;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

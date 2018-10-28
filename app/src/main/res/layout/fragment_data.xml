@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".add.DataFragment">
+    tools:context=".additions.DataFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -111,7 +111,7 @@
         android:layout_marginTop="8dp"
         android:backgroundTint="@color/colorPrimary"
         android:fontFamily="@font/roboto"
-        android:hint="@string/description"
+        android:hint="@string/tags"
         android:imeOptions="actionNone"
         android:inputType="textMultiLine"
         android:maxLines="5"

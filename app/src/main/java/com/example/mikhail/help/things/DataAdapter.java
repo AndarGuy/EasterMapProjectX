@@ -1,4 +1,4 @@
-package com.example.mikhail.help.utils;
+package com.example.mikhail.help.things;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -47,7 +47,6 @@ public class DataAdapter extends BaseAdapter {
         } else {
             grid = convertView;
         }
-
         ImageView imageView = grid.findViewById(R.id.image);
         TextView textView = grid.findViewById(R.id.text);
         imageView.setImageResource(mThumbIds[position]);

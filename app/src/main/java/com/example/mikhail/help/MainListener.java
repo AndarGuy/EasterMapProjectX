@@ -8,7 +8,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.example.mikhail.help.add.AddPlaceActivity;
+import com.example.mikhail.help.additions.AddEventActivity;
+import com.example.mikhail.help.additions.AddPlaceActivity;
 
 public class MainListener {
 
@@ -59,10 +60,13 @@ public class MainListener {
                             openActivity(activity, new AddPlaceActivity(), context, arg);
                             break;
                         case R.id.fabEvent:
-
+                            String arg1[][] = {{"Latitude", String.valueOf(map.location.getLatitude())}, {"Longitude", String.valueOf(map.location.getLongitude())}};
+                            fabMenuClose();
+                            openActivity(activity, new AddEventActivity(), context, arg1);
                             break;
                         case R.id.fabText:
-
+                            fabMenuClose();
+                            Toast.makeText(context, "Coming soon", Toast.LENGTH_LONG).show();
                             break;
 
                     }
