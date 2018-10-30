@@ -2,25 +2,29 @@ package com.example.mikhail.help;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IntRange;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class AuthorizationActivity extends AppCompatActivity {
 
     Button registerButton, loginButton;
 
     AutoCompleteTextView nickname, password;
+
+    public static final int
+            MAX_LOGIN_LENGTH = 16,
+            MIN_LOGIN_LENGTH = 6,
+            MAX_PASSWORD_LENGTH = 16,
+            MIN_PASSWORD_LENGTH = 6;
+
+    public static final int
+            LENGTH_ERROR = 1,
+            OK = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +43,6 @@ public class AuthorizationActivity extends AppCompatActivity {
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (keyEvent != null && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
 
-
-
                 }
                 return false;
             }
@@ -49,6 +51,7 @@ public class AuthorizationActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: Check is data correct
                 //TODO: Login request
             }
         });
@@ -56,9 +59,26 @@ public class AuthorizationActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO: Check is data correct
                 //TODO: Register request
             }
         });
+    }
+
+    public int isLoginCorrect(String login) {
+        if (login.length() > MAX_LOGIN_LENGTH || login.length() < MIN_LOGIN_LENGTH) {
+            return LENGTH_ERROR;
+        } else if (true) {
+
+        } else {
+            return OK;
+        }
+        return OK;
+    }
+
+    public boolean login(String login, String password) {
+
+        return false;
     }
 
     @Override
@@ -69,7 +89,7 @@ public class AuthorizationActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(getResources().getString(R.string.warning) + "!")
-                .setMessage(getResources().getString(R.string.no_sign_in_continue) + "!")
+                .setMessage(getResources().getString(R.string.no_sign_in_continue))
                 .setCancelable(true)
                 .setNegativeButton(getResources().getString(R.string.scontinue),
                         new DialogInterface.OnClickListener() {

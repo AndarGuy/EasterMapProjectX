@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 public class Utilities {
 
+    public static final String AVAILABLE_CHARACTERS = " _1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
     public void setColoredText(TextView textView, String text, Integer color) {
         textView.setTextColor(color);
         textView.setText(text);

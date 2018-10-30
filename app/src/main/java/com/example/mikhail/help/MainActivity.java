@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean isUserLogged() {
         //TODO: make isUserLogged checker if not get reason
-        return true;
+        return false;
     }
 
     //APPEARANCE
