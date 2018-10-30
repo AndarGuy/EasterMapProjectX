@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Trace;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             mapLoad();
         }
 
+        //TODO: replace to AsyncTask
         /* new Thread() {
             @Override
             public void run() {
@@ -280,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean isUserLogged() {
+        //TODO: make isUserLogged checker if not get reason
         return true;
     }
 
@@ -293,6 +296,11 @@ public class MainActivity extends AppCompatActivity {
 
         return networkInfo != null && networkInfo.isConnected();
 
+    }
+
+    public boolean isAuthorizationServerOK() {
+        //TODO: make test request to server
+        return true;
     }
 
 

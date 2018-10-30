@@ -22,14 +22,19 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
 
     private static final String TAG = "AddEventActivity";
 
-    private static final byte MAX_NAME_LENGTH = 25, MIN_NAME_LENGTH = 4;
+    private static final byte
+            MAX_NAME_LENGTH = 25,
+            MIN_NAME_LENGTH = 4;
+    private static int
+            MAX_RADIUS = 300,
+            MIN_RADIUS = 10;
 
     private Button buttonBack, buttonNext;
     private TabLayout tabLayout;
     private CustomViewPager viewPager;
     private TextView hint;
 
-    private LatLng position;
+    private LatLng location;
     private String name, description, code;
     private Bitmap image;
     private int size;
@@ -54,7 +59,7 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
 
     @Override
     public void OnSendPosition(LatLng position) {
-        this.position = position;
+        this.location = position;
     }
 
     @Override
@@ -69,7 +74,7 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
 
         elementsLoad();
 
-        hints = getResources().getStringArray(R.array.add_place_hints);
+        hints = getResources().getStringArray(R.array.add_event_hints);
 
         hint.setText(hints[0]);
         hint.animate().setDuration(6000).alpha(0);
@@ -136,6 +141,7 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
                     tabLayout.getTabAt(tabLayout.getSelectedTabPosition() + 1).select();
                 } else {
                     //finish();
+                    //TODO: make request
                 }
             }
         });
@@ -161,7 +167,7 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
     }
 
     private void setupViewPager(CustomViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        final ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         Bundle bundlePositionFragment = new Bundle();
         PositionFragment positionFragment = new PositionFragment();
@@ -170,7 +176,7 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
         adapter.addFragment(positionFragment, getResources().getString(R.string.position));
 
         Bundle bundleSizeFragment = new Bundle();
-        SizeFragment sizeFragment = new SizeFragment();
+        final SizeFragment sizeFragment = new SizeFragment();
         sendSizeBundles(bundleSizeFragment, sizeFragment);
         sizeFragment.setArguments(bundleSizeFragment);
         adapter.addFragment(sizeFragment, getResources().getString(R.string.size));
@@ -184,6 +190,22 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(adapter);
         viewPager.setEnableSwipe(false);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (adapter.getItem(position) instanceof SizeFragment) sizeFragment.setLocation(location);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     private void sendPositionBundles(Bundle bundle, PositionFragment fragment) {
@@ -193,7 +215,8 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
     }
 
     private void sendSizeBundles(Bundle bundle, SizeFragment fragment) {
-
+        bundle.putInt(fragment.KEY_MIN_RADIUS, MIN_RADIUS);
+        bundle.putInt(fragment.KEY_MAX_RADIUS, MAX_RADIUS);
     }
 
     private void sendDataBundles(Bundle bundle, DataFragment fragment) {

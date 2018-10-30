@@ -49,14 +49,14 @@ public class AuthorizationActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //login
+                //TODO: Login request
             }
         });
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //register
+                //TODO: Register request
             }
         });
     }

@@ -42,11 +42,9 @@ public class DataFragment extends Fragment {
             KEY_NAME_MAX_LEN = "len_max",
             KEY_NAME_MIN_LEN = "len_min";
 
-    static final int RESULT_OK = -1;
-    static final int REQUEST_TAKE_PHOTO = 1;
+    static final int RESULT_OK = -1, REQUEST_TAKE_PHOTO = 1;
 
-    static final byte NAME_MAX_LENGTH = 25;
-    static final byte NAME_MIN_LENGTH = 4;
+    static final byte NAME_MAX_LENGTH = 25, NAME_MIN_LENGTH = 4;
 
     byte nameMaxLength, nameMinLength;
 

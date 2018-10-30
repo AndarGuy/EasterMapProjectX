@@ -58,6 +58,8 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
 
         getBundles();
 
+        mListener.OnSendPosition(zeroLocation);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 

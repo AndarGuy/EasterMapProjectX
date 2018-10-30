@@ -5,16 +5,23 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.example.mikhail.help.R;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -30,26 +37,36 @@ public class SizeFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String
             KEY_MAX_RADIUS = "max_radius",
-            KEY_MIN_RADIUS = "min_radius",
-            KEY_LATITUDE = "lat",
-            KEY_LONGITUDE = "lng";
+            KEY_MIN_RADIUS = "min_radius";
 
     private TextView size;
     private String strMeters;
     private int currRadius, maxHeight, maxRadius, minRadius;
-    private LatLng zeroLocation;
     private GoogleMap mMap;
-    private Double latitude, longitude;
+    private Circle circle;
+    private FrameLayout touchLayout;
+    private LatLng location;
+
+    public void setLocation(LatLng location) {
+        try {
+            this.location = location;
+
+            circle.setCenter(location);
+
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(location).zoom(15F).build();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+            mMap.moveCamera(cameraUpdate);
+        } catch (NullPointerException e) {
+
+        }
+    }
 
     private void getBundles() {
-        latitude = getArguments().getDouble(KEY_LATITUDE);
-        longitude = getArguments().getDouble(KEY_LONGITUDE);
+
         maxRadius = getArguments().getInt(KEY_MAX_RADIUS);
         minRadius = getArguments().getInt(KEY_MIN_RADIUS);
 
-        currRadius = minRadius;
-
-        zeroLocation = new LatLng(latitude, longitude);
+        currRadius = (minRadius + maxRadius) / 2;
     }
 
     @Override
@@ -57,9 +74,16 @@ public class SizeFragment extends Fragment implements OnMapReadyCallback {
                              Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_size, container, false);
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         getBundles();
 
+        mListener.OnSendSize(currRadius);
+
         size = v.findViewById(R.id.size);
+
+        touchLayout = v.findViewById(R.id.touchLayout);
 
         strMeters = getResources().getString(R.string.meters);
 
@@ -74,7 +98,7 @@ public class SizeFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        v.setOnTouchListener(new View.OnTouchListener() {
+        touchLayout.setOnTouchListener(new View.OnTouchListener() {
 
             float startY = 0;
             float startRadius;
@@ -100,7 +124,9 @@ public class SizeFragment extends Fragment implements OnMapReadyCallback {
                 else if (currRadius < minRadius) currRadius = minRadius;
 
                 size.setText(currRadius + " " + strMeters);
+                circle.setRadius(currRadius);
                 mListener.OnSendSize(currRadius);
+
 
                 return true;
             }
@@ -113,10 +139,11 @@ public class SizeFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        mMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.map_style)));
         mMap.getUiSettings().setAllGesturesEnabled(false);
 
-        mMap.addCircle(new CircleOptions().center(zeroLocation).fillColor(Color.argb(80, 0, 0, 0)).strokeWidth(10).strokeColor(Color.rgb(149, 149, 149)).radius(80));
+        mMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.map_style)));
+
+        circle = mMap.addCircle(new CircleOptions().center(new LatLng(0, 0)).fillColor(Color.argb(50, 228, 113, 109)).strokeWidth(10).strokeColor(Color.rgb(228, 113, 109)).radius(currRadius));
     }
 
     public interface OnSizeFragmentDataListener {
