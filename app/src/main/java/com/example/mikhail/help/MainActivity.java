@@ -5,10 +5,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Trace;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -16,21 +16,25 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.SupportMapFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
@@ -41,11 +45,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
-    private DrawerLayout drawerLayout;
-    private ActionBarDrawerToggle barDrawerToggle;
-    private LinearLayout nameEditLayout, profileImageContainer, findsLayout, shopLayout, accountManageLayout, settingsLayout, bugReportLayout;
-    private FrameLayout fabBackGround, fabPlaceSide, fabEventSide, fabTextSide;
-    private FloatingActionButton fab, fabPlace, fabText, fabEvent;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mBarDrawerToggle;
+    private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
+    private FrameLayout mFabBackGround, mFabPlaceSide, mFabEventSide, mFabTextSide;
+    private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
+
+    private PlaceAutocompleteAdapter mAdapter;
+    protected GeoDataClient mGeoDataClient;
 
     public boolean mLocationPermissionGranted = false;
 
@@ -81,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
         elementsLoad();
 
-        listener = new MainListener(fab, fabPlace, fabEvent, fabText, fabBackGround, fabPlaceSide, fabEventSide, fabTextSide);
+        listener = new MainListener(mFab, mFabPlace, mFabEvent, mFabText, mFabBackGround, mFabPlaceSide, mFabEventSide, mFabTextSide);
 
         toolbarLoad();
 
@@ -102,38 +109,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void elementsLoad() {
         Log.d(TAG, "elementsLoad: calls");
-        nameEditLayout = findViewById(R.id.nameEditLayout);
-        drawerLayout = findViewById(R.id.drawerLayout);
-        profileImageContainer = findViewById(R.id.profileImageLayout);
-        findsLayout = findViewById(R.id.findsLayout);
-        shopLayout = findViewById(R.id.shopLayout);
-        accountManageLayout = findViewById(R.id.accountManageLayout);
-        settingsLayout = findViewById(R.id.settingsLayout);
-        bugReportLayout = findViewById(R.id.bugReportLayout);
-        fab = findViewById(R.id.floatingActionButton);
-        fabEvent = findViewById(R.id.fabEvent);
-        fabPlace = findViewById(R.id.fabPlace);
-        fabText = findViewById(R.id.fabText);
-        fabBackGround = findViewById(R.id.fabBackGround);
-        fabPlaceSide = findViewById(R.id.fabPlaceSide);
-        fabEventSide = findViewById(R.id.fabEventSide);
-        fabTextSide = findViewById(R.id.fabTextSide);
+        mNameEditLayout = findViewById(R.id.nameEditLayout);
+        mDrawerLayout = findViewById(R.id.drawerLayout);
+        mProfileImageContainer = findViewById(R.id.profileImageLayout);
+        mFindsLayout = findViewById(R.id.findsLayout);
+        mShopLayout = findViewById(R.id.shopLayout);
+        mAccountManageLayout = findViewById(R.id.accountManageLayout);
+        mSettingsLayout = findViewById(R.id.settingsLayout);
+        mBugReportLayout = findViewById(R.id.bugReportLayout);
+        mFab = findViewById(R.id.floatingActionButton);
+        mFabEvent = findViewById(R.id.fabEvent);
+        mFabPlace = findViewById(R.id.fabPlace);
+        mFabText = findViewById(R.id.fabText);
+        mFabBackGround = findViewById(R.id.fabBackGround);
+        mFabPlaceSide = findViewById(R.id.fabPlaceSide);
+        mFabEventSide = findViewById(R.id.fabEventSide);
+        mFabTextSide = findViewById(R.id.fabTextSide);
     }
 
     private void elementsSetListeners() {
         Log.d(TAG, "elementsSetListeners: calls");
-        nameEditLayout.setOnClickListener(listener.onClickName);
-        drawerLayout.addDrawerListener(barDrawerToggle);
-        profileImageContainer.setOnClickListener(listener.onClickProfileImage);
-        findsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        shopLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        accountManageLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        settingsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        bugReportLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        fab.setOnClickListener(listener.onFabClick());
-        fabPlace.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
-        fabEvent.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
-        fabText.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
+        mNameEditLayout.setOnClickListener(listener.onClickName);
+        mDrawerLayout.addDrawerListener(mBarDrawerToggle);
+        mProfileImageContainer.setOnClickListener(listener.onClickProfileImage);
+        mFindsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mShopLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mAccountManageLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mSettingsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mBugReportLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mFab.setOnClickListener(listener.onFabClick());
+        mFabPlace.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
+        mFabEvent.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
+        mFabText.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
     }
 
     //-------------TOOLBAR-------------
@@ -142,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (barDrawerToggle.onOptionsItemSelected(item)) {
+        if (mBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
@@ -154,18 +161,21 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.app_bar_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
+        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) searchItem.getActionView();
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+        mGeoDataClient = Places.getGeoDataClient(this);
+
+        mAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient, null, null);
+        autoCompleteTextView.setBackground(null);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+        autoCompleteTextView.setWidth(Math.round(displayMetrics.widthPixels * 2 / 3));
+        autoCompleteTextView.setLines(1);
+        autoCompleteTextView.setTextColor(getResources().getColor(R.color.black));
+        autoCompleteTextView.setBackground(getResources().getDrawable(R.drawable.mini_fab_bg));
+        autoCompleteTextView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        autoCompleteTextView.setPadding(16, 16, 16, 16);
+        autoCompleteTextView.setAdapter(mAdapter);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -174,9 +184,9 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
-        barDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
-        barDrawerToggle.syncState();
-        barDrawerToggle.setDrawerSlideAnimationEnabled(false);
+        mBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open, R.string.close);
+        mBarDrawerToggle.syncState();
+        mBarDrawerToggle.setDrawerSlideAnimationEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
@@ -304,4 +314,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }

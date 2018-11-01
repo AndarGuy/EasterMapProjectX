@@ -25,7 +25,7 @@
     <string name="nickname">Nickname</string>
     <string name="sign_in">Sign in</string>
     <string name="warning">Warning</string>
-    <string name="no_sign_in_continue">If you continue without an account, many features of the application will be unavailable!</string>
+    <string name="no_sign_in_continue">If you continue without an account, many features of the application will be unavailable</string>
     <string name="scontinue">Continue</string>
 
     <string name="place">Place</string>
@@ -53,7 +53,7 @@
     <string name="name_of_place">Name of thing</string>
     <string name="description">Description</string>
     <string name="tags">Tags (#fun #super... etc)</string>
-    <string name="need_from_to_symbols">Name length must been from %from% to %to% characters!</string>
+    <string name="need_from_to_symbols">%name% length must been from %from% to %to% characters!</string>
     <string name="unknown_symbols">Unknown symbols!</string>
 
     <string-array name="add_place_hints">

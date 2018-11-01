@@ -14,8 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mikhail.help.R;
-import com.example.mikhail.help.things.CustomViewPager;
-import com.example.mikhail.help.things.ViewPagerAdapter;
+import com.example.mikhail.help.util.CustomViewPager;
+import com.example.mikhail.help.util.ViewPagerAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
 public class AddPlaceActivity extends AppCompatActivity implements PositionFragment.OnPositionFragmentDataListener, TypeFragment.OnTypeFragmentDataListener, DataFragment.OnDataFragmentDataListener {

@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center">
 
@@ -25,11 +25,24 @@
             android:hint="@string/nickname"
             android:inputType="textPersonName" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+
     </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/nicknameInfo"
+        style="@style/Text.InputWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="wrap_content"
         android:gravity="center">
 
         <ImageView
@@ -49,4 +62,11 @@
 
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/passwordInfo"
+        style="@style/Text.InputWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
 </LinearLayout>

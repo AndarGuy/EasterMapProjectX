@@ -23,6 +23,7 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.example.mikhail.help.R;
+import com.example.mikhail.help.util.Utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,16 +120,6 @@ public class DataFragment extends Fragment {
         }
     }
 
-    private boolean isKnownSymbols(String s) {
-        for (char c : s.toCharArray()) {
-            int i = (int) c;
-            if (!((i >= 48 && i <= 57) || (i >= 65 && i <= 90) || (i >= 97 && i <= 122) || (i >= 1040 && i <= 1103) || i == 32)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private void elementsLoad(View v) {
         mImageView = v.findViewById(R.id.myImage);
         description = v.findViewById(R.id.descriptionInput);
@@ -169,15 +160,13 @@ public class DataFragment extends Fragment {
                     viewSwitcher.setClickable(false);
                     element.requestFocus();
                     ((EditText) element).selectAll();
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(element, 0);
                     element.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                         @Override
                         public void onFocusChange(View view, boolean b) {
                             if (!b) {
                                 if (((EditText) element).getText().length() >= NAME_MAX_LENGTH || ((EditText) element).getText().length() <= NAME_MIN_LENGTH) {
-                                    Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%from%", NAME_MIN_LENGTH + "").replace("%to%", NAME_MAX_LENGTH + ""), Toast.LENGTH_SHORT).show();
-                                } else if (!isKnownSymbols(((EditText) element).getText().toString())) {
+                                    Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
+                                } else if (!Utilities.isAvailableCharacters(((EditText) element).getText().toString(), Utilities.DESCRIPTION_CHARACTERS)) {
                                     Toast.makeText(getContext(), getResources().getString(R.string.unknown_symbols), Toast.LENGTH_SHORT).show();
                                 } else {
                                     name.setText(((EditText) element).getText().toString());

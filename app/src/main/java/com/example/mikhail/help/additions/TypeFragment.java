@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mikhail.help.R;
-import com.example.mikhail.help.things.DataAdapter;
+import com.example.mikhail.help.util.DataAdapter;
 
 
 public class TypeFragment extends Fragment {

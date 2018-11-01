@@ -1,4 +1,4 @@
-package com.example.mikhail.help.things;
+package com.example.mikhail.help.util;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

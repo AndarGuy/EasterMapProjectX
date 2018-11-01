@@ -1,4 +1,4 @@
-package com.example.mikhail.help.things;
+package com.example.mikhail.help.util;
 
 import android.content.Context;
 import android.view.LayoutInflater;

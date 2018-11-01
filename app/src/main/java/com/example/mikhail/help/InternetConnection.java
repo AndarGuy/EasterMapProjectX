@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.mikhail.help.things.Utilities;
+import com.example.mikhail.help.util.Utilities;
 
 public class InternetConnection extends AppCompatActivity {
 

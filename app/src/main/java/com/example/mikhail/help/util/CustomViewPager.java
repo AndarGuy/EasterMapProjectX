@@ -1,4 +1,4 @@
-package com.example.mikhail.help.things;
+package com.example.mikhail.help.util;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;
@@ -25,13 +25,11 @@ public class CustomViewPager extends ViewPager {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        // Never allow swiping to switch between pages
         return enableSwipe && super.onInterceptTouchEvent(event);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // Never allow swiping to switch between pages
         return enableSwipe && super.onTouchEvent(event);
 
     }
