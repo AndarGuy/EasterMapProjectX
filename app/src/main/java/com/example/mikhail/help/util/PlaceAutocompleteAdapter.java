@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 
 public class PlaceAutocompleteAdapter extends ArrayAdapter<AutocompletePrediction> implements Filterable {
 
-    private static final String TAG = "PlaceAutocompleteAdapter";
     private static final CharacterStyle STYLE_BOLD = new StyleSpan(Typeface.BOLD);
 
     private ArrayList<AutocompletePrediction> mResultList;
@@ -109,7 +107,6 @@ public class PlaceAutocompleteAdapter extends ArrayAdapter<AutocompletePredictio
                     mResultList = (ArrayList<AutocompletePrediction>) results.values;
                     notifyDataSetChanged();
                 } else {
-                    // The API did not return any results, invalidate the data set.
                     notifyDataSetInvalidated();
                 }
             }
@@ -142,8 +139,6 @@ public class PlaceAutocompleteAdapter extends ArrayAdapter<AutocompletePredictio
 
             return DataBufferUtils.freezeAndClose(autocompletePredictions);
         } catch (RuntimeExecutionException e) {
-            Toast.makeText(getContext(), "Error contacting API: " + e.toString(),
-                    Toast.LENGTH_SHORT).show();
             return null;
         }
     }

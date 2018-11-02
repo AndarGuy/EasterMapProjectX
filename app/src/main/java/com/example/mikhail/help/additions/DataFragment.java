@@ -160,13 +160,15 @@ public class DataFragment extends Fragment {
                     viewSwitcher.setClickable(false);
                     element.requestFocus();
                     ((EditText) element).selectAll();
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(element, 0);
                     element.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                         @Override
                         public void onFocusChange(View view, boolean b) {
                             if (!b) {
                                 if (((EditText) element).getText().length() >= NAME_MAX_LENGTH || ((EditText) element).getText().length() <= NAME_MIN_LENGTH) {
                                     Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
-                                } else if (!Utilities.isAvailableCharacters(((EditText) element).getText().toString(), Utilities.DESCRIPTION_CHARACTERS)) {
+                                } else if (Utilities.isAvailableCharacters(((EditText) element).getText().toString(), Utilities.DESCRIPTION_CHARACTERS)) {
                                     Toast.makeText(getContext(), getResources().getString(R.string.unknown_symbols), Toast.LENGTH_SHORT).show();
                                 } else {
                                     name.setText(((EditText) element).getText().toString());

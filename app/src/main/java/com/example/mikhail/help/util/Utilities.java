@@ -1,12 +1,15 @@
 package com.example.mikhail.help.util;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.TypedValue;
 import android.widget.TextView;
 
 import org.bouncycastle.jcajce.provider.digest.SHA3;
@@ -27,6 +30,15 @@ public class Utilities {
             DESCRIPTION_CHARACTERS = SPC_CHARACTERS + RUS_CHARACTERS + OTH_CHARACTERS + NUM_CHARACTERS + ENG_CHARACTERS,
             LOGIN_CHARACTERS = ENG_CHARACTERS + NUM_CHARACTERS + OTH_CHARACTERS,
             PASSWORD_CHARACTERS = ENG_CHARACTERS + NUM_CHARACTERS;
+
+    public static int getPxFromDp(int dp, Context context) {
+        Resources r = context.getResources();
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                r.getDisplayMetrics()
+        );
+    }
 
     public static String getSHA3(String string) throws Exception {
         SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest512();

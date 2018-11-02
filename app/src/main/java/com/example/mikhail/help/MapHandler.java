@@ -3,10 +3,13 @@ package com.example.mikhail.help;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -20,6 +23,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapHandler implements OnMapReadyCallback {
 
@@ -102,6 +109,26 @@ public class MapHandler implements OnMapReadyCallback {
         mMap.setMapStyle(new MapStyleOptions(context.getResources().getString(R.string.map_style)));
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             mMap.setMyLocationEnabled(true);
+    }
+
+    public void goToPlace(String place) {
+
+        Geocoder geocoder = new Geocoder(context);
+        List<Address> list = new ArrayList<>();
+
+        try {
+            list = geocoder.getFromLocationName(place, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (list.size() > 0) {
+            Address address = list.get(0);
+
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(address.getLatitude(), address.getLongitude())).zoom(mMap.getCameraPosition().zoom).build();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+            mMap.animateCamera(cameraUpdate);
+        }
     }
 
     GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {

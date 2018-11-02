@@ -17,16 +17,25 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
+import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TwoLineListItem;
 
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
+import com.example.mikhail.help.util.Utilities;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,11 +48,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
 
-    private static final String TAG = "MainActivity";
-    private static final int ERROR_DIALOG_REQUEST = 9001;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private final String TAG = "MainActivity";
+    private final int ERROR_DIALOG_REQUEST = 9001;
+    private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mBarDrawerToggle;
@@ -160,22 +169,99 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.app_bar_menu, menu);
 
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) searchItem.getActionView();
+        int dp8 = Utilities.getPxFromDp(8, this), dp16 = Utilities.getPxFromDp(16, this);
 
         mGeoDataClient = Places.getGeoDataClient(this);
-
         mAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient, null, null);
-        autoCompleteTextView.setBackground(null);
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 
-        autoCompleteTextView.setWidth(Math.round(displayMetrics.widthPixels * 2 / 3));
-        autoCompleteTextView.setLines(1);
-        autoCompleteTextView.setTextColor(getResources().getColor(R.color.black));
-        autoCompleteTextView.setBackground(getResources().getDrawable(R.drawable.mini_fab_bg));
-        autoCompleteTextView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
-        autoCompleteTextView.setPadding(16, 16, 16, 16);
-        autoCompleteTextView.setAdapter(mAdapter);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        LinearLayout linearLayout = (LinearLayout) searchItem.getActionView();
+        final ImageView imageView = new ImageView(this);
+        final AutoCompleteTextView textView = new AutoCompleteTextView(this);
+
+        LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        final LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(Utilities.getPxFromDp(284, this), LinearLayout.LayoutParams.MATCH_PARENT);
+
+        linearLayout.setLayoutParams(linearLayoutParams);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+
+        imageLayoutParams.gravity = Gravity.CENTER;
+        imageLayoutParams.setMarginEnd(dp16);
+        imageLayoutParams.setMarginStart(dp16);
+
+        imageView.setLayoutParams(imageLayoutParams);
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
+        imageView.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!textView.isEnabled()) {
+                    textView.setScaleX(1f);
+                    textView.setEnabled(true);
+                    textView.requestFocus();
+                    textView.selectAll();
+                    imageView.setImageDrawable(getDrawable(R.drawable.ic_plus));
+                    imageView.setRotation(45);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(textView, 0);
+                } else {
+                    textView.clearFocus();
+                    textView.setScaleX(0f);
+                    textView.setEnabled(false);
+                    imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
+                    imageView.setRotation(0);
+                }
+            }
+        });
+
+
+        textLayoutParams.setMargins(0, dp8, 0, dp8);
+
+        textView.setScaleX(0);
+        textView.setEnabled(false);
+        textView.setLayoutParams(textLayoutParams);
+        textView.setInputType(InputType.TYPE_CLASS_TEXT);
+        textView.setImeOptions(View.GONE);
+        textView.setAdapter(mAdapter);
+        textView.setLines(1);
+        textView.setTextColor(getResources().getColor(R.color.white));
+        textView.setBackground(getResources().getDrawable(R.drawable.mini_fab_bg));
+        textView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)).withAlpha(20));
+        textView.setLayoutParams(textLayoutParams);
+        textView.setPadding(dp8, 0, dp8, 0);
+        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                mapHandler.goToPlace(textView.getText().toString());
+
+                textView.clearFocus();
+                textView.setScaleX(0f);
+                textView.setEnabled(false);
+                imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
+                imageView.setRotation(0);
+            }
+        });
+        textView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    mapHandler.goToPlace(textView.getText().toString());
+
+                    textView.clearFocus();
+                    textView.setScaleX(0f);
+                    textView.setEnabled(false);
+                    imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
+                    imageView.setRotation(0);
+                }
+                return false;
+            }
+        });
+
+
+        linearLayout.addView(textView);
+        linearLayout.addView(imageView);
 
         return super.onCreateOptionsMenu(menu);
     }
