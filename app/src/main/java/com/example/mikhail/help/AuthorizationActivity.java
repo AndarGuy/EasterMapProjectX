@@ -2,10 +2,13 @@ package com.example.mikhail.help;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -14,32 +17,46 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.mikhail.help.util.Utilities;
+import com.example.mikhail.help.web.RequestListener;
+import com.example.mikhail.help.web.RetrofitRequest;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
 
 public class AuthorizationActivity extends AppCompatActivity {
 
-    private static final String TAG = "AuthorizationActivity";
+    private final String TAG = "AuthorizationActivity";
 
-    private static final String
-            LOGIN = "log",
-            REGISTER = "reg";
+    private final String
+            PASSWORD = "password",
+            EMAIL = "email",
+            LOGIN = "login",
+            REGISTER = "register";
+
+    public static final String APP_PREFERENCES = "config";
 
     private Button registerButton, loginButton;
 
-    private AutoCompleteTextView loginView, passwordView;
+    private AutoCompleteTextView emailView, passwordView;
 
-    private TextView loginInfo, passwordInfo;
+    private TextView emailInfo, passwordInfo;
 
-    public static final int
-            MAX_LOGIN_LENGTH = 16,
-            MIN_LOGIN_LENGTH = 4,
+    public final int
             MAX_PASSWORD_LENGTH = 32,
             MIN_PASSWORD_LENGTH = 6;
 
-    public static final int
-            ENCRYPT_ERROR = 3,
-            CHARACTERS_ERROR = 2,
-            LENGTH_ERROR = 1,
-            OK = 0;
+    public final int
+            WRONG_EMAIL = 1,
+            WRONG_PASSWORD = 2,
+            ALREADY_REGISTERED = 3,
+            SQL_ERROR = 4;
+
+    public final int
+            INVALID_EMAIL = 2,
+            LENGTH_ERROR = 1;
+
+    public final int OK = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +65,12 @@ public class AuthorizationActivity extends AppCompatActivity {
 
         loginButton = findViewById(R.id.enterButton);
         registerButton = findViewById(R.id.registerButton);
-        loginView = findViewById(R.id.nicknameInput);
+        emailView = findViewById(R.id.nicknameInput);
         passwordView = findViewById(R.id.passwordInput);
-        loginInfo = findViewById(R.id.nicknameInfo);
+        emailInfo = findViewById(R.id.nicknameInfo);
         passwordInfo = findViewById(R.id.passwordInfo);
 
-        loginView.setOnEditorActionListener(null);
+        emailView.setOnEditorActionListener(null);
 
         passwordView.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -69,40 +86,34 @@ public class AuthorizationActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String login = loginView.getText().toString();
+                String email = emailView.getText().toString();
                 String password = passwordView.getText().toString();
-                if (checkData(login, password)) makeRequest(LOGIN, login, password);
+                if (checkData(email, password)) makeRequest(LOGIN, email, password);
             }
         });
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String login = loginView.getText().toString();
+                String email = emailView.getText().toString();
                 String password = passwordView.getText().toString();
-                if (checkData(login, password)) makeRequest(REGISTER, login, password);
+                if (checkData(email, password)) makeRequest(REGISTER, email, password);
             }
         });
     }
 
-    private boolean checkData(String login, String password) {
+    private boolean checkData(String email, String password) {
 
-        switch (isLoginCorrect(login)) {
+        switch (isEmailCorrect(email)) {
             case OK:
-                loginView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-                loginInfo.setText("");
+                emailView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+                emailInfo.setText("");
                 break;
-            case LENGTH_ERROR:
-                loginView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                loginInfo.setText(getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.login)).replace("%from%", String.valueOf(MIN_LOGIN_LENGTH)).replace("%to%", String.valueOf(MAX_LOGIN_LENGTH)));
-                return false;
-            case CHARACTERS_ERROR:
-                loginView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                loginInfo.setText(getResources().getString(R.string.unknown_symbols));
+            case INVALID_EMAIL:
+                sendError(getString(R.string.invalid_email), emailView, emailInfo);
                 return false;
             default:
-                loginView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                loginInfo.setText(getResources().getString(R.string.something_wrong));
+                sendError(getResources().getString(R.string.something_wrong), emailView, emailInfo);
                 return false;
         }
 
@@ -112,27 +123,24 @@ public class AuthorizationActivity extends AppCompatActivity {
                 passwordInfo.setText("");
                 break;
             case LENGTH_ERROR:
-                passwordView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                passwordInfo.setText(getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.login)).replace("%from%", String.valueOf(MIN_LOGIN_LENGTH)).replace("%to%", String.valueOf(MAX_LOGIN_LENGTH)));
-                return false;
-            case CHARACTERS_ERROR:
-                passwordView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                passwordInfo.setText(getResources().getString(R.string.unknown_symbols));
+                sendError(getString(R.string.need_from_to_symbols).replace("%name%", getString(R.string.password)).replace("%from%", String.valueOf(MIN_PASSWORD_LENGTH)).replace("%to%", String.valueOf(MAX_PASSWORD_LENGTH)), passwordView, passwordInfo);
                 return false;
             default:
-                passwordView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
-                passwordInfo.setText(getResources().getString(R.string.something_wrong));
+                sendError(getString(R.string.something_wrong), passwordView, passwordInfo);
                 return false;
         }
 
         return true;
     }
 
-    private int isLoginCorrect(String login) {
-        if (login.length() > MAX_LOGIN_LENGTH || login.length() < MIN_LOGIN_LENGTH) {
-            return LENGTH_ERROR;
-        } else if (Utilities.isAvailableCharacters(login, Utilities.LOGIN_CHARACTERS)) {
-            return CHARACTERS_ERROR;
+    private void sendError(String message, AutoCompleteTextView textView, TextView info) {
+        textView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+        info.setText(message);
+    }
+
+    private int isEmailCorrect(String email) {
+        if (!Utilities.isValidEmail(email)) {
+            return INVALID_EMAIL;
         } else {
             return OK;
         }
@@ -141,22 +149,52 @@ public class AuthorizationActivity extends AppCompatActivity {
     private int isPasswordCorrect(String password) {
         if (password.length() > MAX_PASSWORD_LENGTH || password.length() < MIN_PASSWORD_LENGTH) {
             return LENGTH_ERROR;
-        } else if (Utilities.isAvailableCharacters(password, Utilities.PASSWORD_CHARACTERS)) {
-            return CHARACTERS_ERROR;
         } else {
             return OK;
         }
     }
 
-    private int makeRequest(String type, String login, String password) {
-        String encryptedLogin, encryptedPassword;
-        try {
-            encryptedLogin = Utilities.getSHA3(login);
-            encryptedPassword = Utilities.getSHA3(password);
-        } catch (Exception e) {
-            return ENCRYPT_ERROR;
-        }
+    private int makeRequest(final String action, final String email, final String password) {
+        final RetrofitRequest request = new RetrofitRequest(action);
 
+        request.putParam(EMAIL, email);
+        request.putParam(PASSWORD, password);
+        request.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+                switch (result) {
+                    case OK:
+                        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString(EMAIL, email);
+                        editor.putString(PASSWORD, password);
+                        editor.commit();
+                        finish();
+                        break;
+                    case WRONG_EMAIL:
+                        sendError(getString(R.string.wrong_email), emailView, emailInfo);
+                        break;
+                    case WRONG_PASSWORD:
+                        sendError(getString(R.string.wrong_password), passwordView, passwordInfo);
+                        break;
+                    case ALREADY_REGISTERED:
+                        sendError(getString(R.string.already_registered), emailView, emailInfo);
+                        break;
+                    case SQL_ERROR:
+                        sendError(getString(R.string.sql_error), emailView, emailInfo);
+                        break;
+                    default:
+                        sendError(getString(R.string.unknown_error).replace("%num%", String.valueOf(result)), emailView, emailInfo);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                Log.d(TAG, "onFailure: " + t.toString());
+                sendError(getString(R.string.no_connection), emailView, emailInfo);
+            }
+        });
+        request.makeRequest();
         return OK;
     }
 

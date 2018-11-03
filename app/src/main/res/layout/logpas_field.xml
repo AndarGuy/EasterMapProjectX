@@ -22,8 +22,8 @@
             style="@style/Input"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="@string/nickname"
-            android:inputType="textPersonName" />
+            android:hint="@string/email"
+            android:inputType="textEmailAddress" />
 
         <TextView
             android:layout_width="wrap_content"

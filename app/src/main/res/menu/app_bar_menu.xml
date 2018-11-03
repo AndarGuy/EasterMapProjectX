@@ -6,7 +6,6 @@
         android:id="@+id/action_search"
         android:title="action_search"
         app:showAsAction="ifRoom"
-        app:actionViewClass="android.widget.LinearLayout"
-        android:tooltipText="@string/account" />
+        app:actionViewClass="android.widget.LinearLayout" />
 
 </menu>

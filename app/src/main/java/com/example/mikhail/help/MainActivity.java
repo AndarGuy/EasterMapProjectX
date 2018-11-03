@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -30,18 +33,22 @@ import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TwoLineListItem;
 
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
 import com.example.mikhail.help.util.Utilities;
+import com.example.mikhail.help.web.RequestListener;
+import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.SupportMapFragment;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -53,17 +60,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private final String ACTION_TEST = "test";
+    private final String
+            PASSWORD = "password",
+            EMAIL = "email",
+            LOGIN = "login";
+    private final int OK = 0;
+    public static final String APP_PREFERENCES = "config";
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mBarDrawerToggle;
     private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
-    private FrameLayout mFabBackGround, mFabPlaceSide, mFabEventSide, mFabTextSide;
+    private FrameLayout mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide;
     private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
 
     private PlaceAutocompleteAdapter mAdapter;
     protected GeoDataClient mGeoDataClient;
 
     public boolean mLocationPermissionGranted = false;
+    public boolean userAuthorized = false;
 
 
     //-------------MAIN-------------
@@ -97,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         elementsLoad();
 
-        listener = new MainListener(mFab, mFabPlace, mFabEvent, mFabText, mFabBackGround, mFabPlaceSide, mFabEventSide, mFabTextSide);
+        listener = new MainListener(mFab, mFabPlace, mFabEvent, mFabText, mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide);
 
         toolbarLoad();
 
@@ -130,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mFabEvent = findViewById(R.id.fabEvent);
         mFabPlace = findViewById(R.id.fabPlace);
         mFabText = findViewById(R.id.fabText);
-        mFabBackGround = findViewById(R.id.fabBackGround);
+        mFabBackground = findViewById(R.id.fabBackGround);
         mFabPlaceSide = findViewById(R.id.fabPlaceSide);
         mFabEventSide = findViewById(R.id.fabEventSide);
         mFabTextSide = findViewById(R.id.fabTextSide);
@@ -181,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
         final LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(Utilities.getPxFromDp(284, this), LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(getResources().getDisplayMetrics().widthPixels - (dp16 * 8), LinearLayout.LayoutParams.MATCH_PARENT);
 
         linearLayout.setLayoutParams(linearLayoutParams);
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -198,20 +213,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(View view) {
                 if (!textView.isEnabled()) {
-                    textView.setScaleX(1f);
-                    textView.setEnabled(true);
-                    textView.requestFocus();
-                    textView.selectAll();
-                    imageView.setImageDrawable(getDrawable(R.drawable.ic_plus));
-                    imageView.setRotation(45);
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(textView, 0);
+                    searchOpen(textView, imageView);
                 } else {
-                    textView.clearFocus();
-                    textView.setScaleX(0f);
-                    textView.setEnabled(false);
-                    imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
-                    imageView.setRotation(0);
+                    searchClose(textView, imageView);
                 }
             }
         });
@@ -223,12 +227,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         textView.setEnabled(false);
         textView.setLayoutParams(textLayoutParams);
         textView.setInputType(InputType.TYPE_CLASS_TEXT);
-        textView.setImeOptions(View.GONE);
         textView.setAdapter(mAdapter);
         textView.setLines(1);
         textView.setTextColor(getResources().getColor(R.color.white));
-        textView.setBackground(getResources().getDrawable(R.drawable.mini_fab_bg));
-        textView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)).withAlpha(20));
+        Drawable bg = getDrawable(R.drawable.mini_fab_bg);
+        bg.setAlpha(20);
+        textView.setBackground(bg);
+        textView.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK));
         textView.setLayoutParams(textLayoutParams);
         textView.setPadding(dp8, 0, dp8, 0);
         textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -236,11 +241,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 mapHandler.goToPlace(textView.getText().toString());
 
-                textView.clearFocus();
-                textView.setScaleX(0f);
-                textView.setEnabled(false);
-                imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
-                imageView.setRotation(0);
+                searchClose(textView, imageView);
             }
         });
         textView.setOnKeyListener(new View.OnKeyListener() {
@@ -249,21 +250,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                     mapHandler.goToPlace(textView.getText().toString());
 
-                    textView.clearFocus();
-                    textView.setScaleX(0f);
-                    textView.setEnabled(false);
-                    imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
-                    imageView.setRotation(0);
+                    searchClose(textView, imageView);
                 }
                 return false;
             }
         });
 
-
         linearLayout.addView(textView);
         linearLayout.addView(imageView);
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void searchClose(AutoCompleteTextView textView, ImageView imageView) {
+        textView.setScaleX(0f);
+        textView.setEnabled(false);
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
+        imageView.setRotation(0);
+    }
+
+    private void searchOpen(AutoCompleteTextView textView, ImageView imageView) {
+        textView.setScaleX(1f);
+        textView.setEnabled(true);
+        textView.requestFocus();
+        textView.selectAll();
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_plus));
+        imageView.setRotation(45);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(textView, 0);
     }
 
     private void toolbarLoad() {
@@ -348,19 +362,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     //-------------ACCOUNT-------------
 
-    public void authorizeReload() {
-
-    }
-
-    public boolean userAuthorize() {
-        if (isServerOK()) {
-            if (isUserLogged()) {
-                return true;
-            } else {
-                openAuthorizationActivity(this);
+    public void userAuthorize() {
+        RetrofitRequest request = new RetrofitRequest(ACTION_TEST);
+        request.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+                userLogin();
             }
-        }
-        return false;
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                Toast.makeText(MainActivity.this, getString(R.string.server_not_online), Toast.LENGTH_SHORT).show();
+            }
+        });
+        request.makeRequest();
     }
 
     public void openAuthorizationActivity(Context context) {
@@ -373,13 +388,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         startActivityForResult(intent, RESULT_OK);
     }
 
-    public boolean isServerOK() {
-        return true;
-    }
+    public void userLogin() {
+        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+        if (preferences.contains(PASSWORD) && preferences.contains(EMAIL)) {
+            RetrofitRequest request = new RetrofitRequest(LOGIN);
+            request.putParam(EMAIL, preferences.getString(EMAIL, null));
+            request.putParam(PASSWORD, preferences.getString(PASSWORD, null));
+            request.setListener(new RequestListener() {
+                @Override
+                public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+                    Log.d(TAG, "onResponse: " + result);
+                    if (result != OK) {
+                        openAuthorizationActivity(MainActivity.this);
+                    }
+                }
 
-    public boolean isUserLogged() {
-        //TODO: make isUserLogged checker if not get reason
-        return false;
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
+                }
+            });
+            request.makeRequest();
+
+        } else {
+            openAuthorizationActivity(this);
+        }
     }
 
     //APPEARANCE
@@ -392,11 +425,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         return networkInfo != null && networkInfo.isConnected();
 
-    }
-
-    public boolean isAuthorizationServerOK() {
-        //TODO: make test request to server
-        return true;
     }
 
 

@@ -1,7 +1,6 @@
 package com.example.mikhail.help.util;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,27 +8,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Patterns;
 import android.util.TypedValue;
 import android.widget.TextView;
 
-import org.bouncycastle.jcajce.provider.digest.SHA3;
-import org.bouncycastle.util.encoders.Hex;
-
 public class Utilities {
 
-    public static final String
-            SPC_CHARACTERS = " ",
-            OTH_CHARACTERS = "_",
-            NUM_CHARACTERS = "1234567890",
-            ENG_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-            RUS_CHARACTERS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-
     private static final String TAG = "Utilities";
-
-    public static final String
-            DESCRIPTION_CHARACTERS = SPC_CHARACTERS + RUS_CHARACTERS + OTH_CHARACTERS + NUM_CHARACTERS + ENG_CHARACTERS,
-            LOGIN_CHARACTERS = ENG_CHARACTERS + NUM_CHARACTERS + OTH_CHARACTERS,
-            PASSWORD_CHARACTERS = ENG_CHARACTERS + NUM_CHARACTERS;
 
     public static int getPxFromDp(int dp, Context context) {
         Resources r = context.getResources();
@@ -40,12 +25,6 @@ public class Utilities {
         );
     }
 
-    public static String getSHA3(String string) throws Exception {
-        SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest512();
-        byte[] digest = digestSHA3.digest(string.getBytes());
-        return Hex.toHexString(digest);
-    }
-
     public static boolean isAvailableCharacters(String s, String res) {
         for (Character c : s.toCharArray()) {
             if (!res.contains(c.toString())) {
@@ -53,6 +32,10 @@ public class Utilities {
             }
         }
         return false;
+    }
+
+    public static boolean isValidEmail(String email) {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     public static void setColoredText(TextView textView, String text, Integer color) {

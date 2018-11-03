@@ -119,7 +119,7 @@ public class MapHandler implements OnMapReadyCallback {
         try {
             list = geocoder.getFromLocationName(place, 1);
         } catch (IOException e) {
-            e.printStackTrace();
+
         }
 
         if (list.size() > 0) {

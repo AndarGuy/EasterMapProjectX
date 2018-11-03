@@ -17,7 +17,7 @@
     <string name="something_wrong">Oops! Something Wrong</string>
     <string name="search">Search</string>
 
-    <string name="login">Login</string>
+    <string name="user_name">Login</string>
     <string name="name">Name</string>
     <string name="password">Password</string>
     <string name="register">Register</string>
@@ -38,6 +38,7 @@
     <string name="data">Data</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
+    <string name="nothing_found">Nothing found</string>
 
     <string name="add_event">Add event</string>
     <string name="meters">meters</string>
@@ -54,7 +55,13 @@
     <string name="description">Description</string>
     <string name="tags">Tags (#fun #super... etc)</string>
     <string name="need_from_to_symbols">%name% length must been from %from% to %to% characters!</string>
-    <string name="unknown_symbols">Unknown symbols!</string>
+    <string name="invalid_email">Invalid Email!</string>
+    <string name="wrong_email">Wrong Email!</string>
+    <string name="wrong_password">Wrong Password!</string>
+    <string name="sql_error">SQL ERROR</string>
+    <string name="already_registered">That email already registered</string>
+    <string name="unknown_error">ERROR %num%</string>
+    <string name="server_not_online">Can not connect to the server</string>
 
     <string-array name="add_place_hints">
         <item>Choose accurate location</item>
@@ -71,6 +78,7 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_internet_connection">InternetConnection</string>
+    <string name="email">Email</string>
 
     <string-array name="types_places">
         <item>Graffiti</item>

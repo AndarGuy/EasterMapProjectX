@@ -23,7 +23,6 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.example.mikhail.help.R;
-import com.example.mikhail.help.util.Utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -168,8 +167,6 @@ public class DataFragment extends Fragment {
                             if (!b) {
                                 if (((EditText) element).getText().length() >= NAME_MAX_LENGTH || ((EditText) element).getText().length() <= NAME_MIN_LENGTH) {
                                     Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
-                                } else if (Utilities.isAvailableCharacters(((EditText) element).getText().toString(), Utilities.DESCRIPTION_CHARACTERS)) {
-                                    Toast.makeText(getContext(), getResources().getString(R.string.unknown_symbols), Toast.LENGTH_SHORT).show();
                                 } else {
                                     name.setText(((EditText) element).getText().toString());
                                     nameString = ((EditText) element).getText().toString();
@@ -189,7 +186,9 @@ public class DataFragment extends Fragment {
 
     public interface OnDataFragmentDataListener {
         void OnSendName(String name);
+
         void OnSendDescription(String description);
+
         void OnSendImage(Bitmap image);
     }
 
