@@ -27,12 +27,14 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
@@ -50,7 +52,7 @@ import java.util.HashMap;
 
 import retrofit2.Call;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity {
 
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
@@ -62,9 +64,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private final String ACTION_TEST = "test";
     private final String
+            NEW_NAME = "new_name",
+            ACTION_GENERATE = "generate",
+            ACTION_SET = "set",
+            ACTION_GET = "get",
+            NAME = "name",
             PASSWORD = "password",
             EMAIL = "email",
             LOGIN = "login";
+    private final int REQUEST_ACCOUNT = 2;
     private final int OK = 0;
     public static final String APP_PREFERENCES = "config";
 
@@ -73,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
     private FrameLayout mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide;
     private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
+    private TextView nameView;
 
     private PlaceAutocompleteAdapter mAdapter;
     protected GeoDataClient mGeoDataClient;
@@ -149,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mFabPlaceSide = findViewById(R.id.fabPlaceSide);
         mFabEventSide = findViewById(R.id.fabEventSide);
         mFabTextSide = findViewById(R.id.fabTextSide);
+        nameView = findViewById(R.id.name);
     }
 
     private void elementsSetListeners() {
@@ -366,52 +376,139 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         RetrofitRequest request = new RetrofitRequest(ACTION_TEST);
         request.setListener(new RequestListener() {
             @Override
-            public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 userLogin();
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
                 Toast.makeText(MainActivity.this, getString(R.string.server_not_online), Toast.LENGTH_SHORT).show();
+
             }
         });
         request.makeRequest();
     }
 
-    public void openAuthorizationActivity(Context context) {
-        Intent intent = new Intent(context, AuthorizationActivity.class);
-        startActivityForResult(intent, RESULT_OK);
+    public void openAuthorizationActivity() {
+        Intent intent = new Intent(getBaseContext(), AuthorizationActivity.class);
+        startActivityForResult(intent, REQUEST_ACCOUNT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode);
+        if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_CANCELED) withoutAccount();
+        else if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_OK) MainActivity.this.recreate();
     }
 
     public void openInternetConnection(Context context) {
         Intent intent = new Intent(context, InternetConnection.class);
-        startActivityForResult(intent, RESULT_OK);
+        startActivity(intent);
+    }
+
+    private void generateName(final String email, final String password) {
+        RetrofitRequest request = new RetrofitRequest(NAME);
+        request.setNextAction(ACTION_GENERATE);
+        request.putParam(EMAIL, email);
+        request.putParam(PASSWORD, password);
+        request.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                if (result == OK) {
+                    setName(email, password, response.get(NAME).toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                Log.d(TAG, "onResponse: nick generate error!");
+            }
+        });
+        request.makeRequest();
+    }
+
+    private void setName(final String email, final String password, final String new_name) {
+        RetrofitRequest request = new RetrofitRequest(NAME);
+        request.setNextAction(ACTION_SET);
+        request.putParam(EMAIL, email);
+        request.putParam(PASSWORD, password);
+        request.putParam(NEW_NAME, new_name);
+        request.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                if (result == OK) {
+                    if (result == OK) {
+                        Log.d(TAG, "onResponse: nick change to " + new_name);
+                        getName(email, password);
+                    }
+                    else Log.d(TAG, "onResponse: nick change error!");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                Log.d(TAG, "onResponse: nick change error!");
+            }
+        });
+        request.makeRequest();
+    }
+
+    private void getName(final String email, final String password) {
+        RetrofitRequest request = new RetrofitRequest(NAME);
+        request.setNextAction(ACTION_GET);
+        request.putParam(EMAIL, email);
+        request.putParam(PASSWORD, password);
+        request.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                if (result == OK) {
+                    String name = String.valueOf(response.get(NAME));
+                    if (name.length() == 0) {
+                        generateName(email, password);
+                    } else {
+                        nameView.setText(name);
+                        Log.d(TAG, "onResponse: gotten name is " + name);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                Log.d(TAG, "onFailure: very bad ;( " + t.toString());
+            }
+        });
+        request.makeRequest();
     }
 
     public void userLogin() {
         SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
         if (preferences.contains(PASSWORD) && preferences.contains(EMAIL)) {
             RetrofitRequest request = new RetrofitRequest(LOGIN);
-            request.putParam(EMAIL, preferences.getString(EMAIL, null));
-            request.putParam(PASSWORD, preferences.getString(PASSWORD, null));
+            final String email = preferences.getString(EMAIL, null), password = preferences.getString(PASSWORD, null);
+            request.putParam(EMAIL, email);
+            request.putParam(PASSWORD, password);
             request.setListener(new RequestListener() {
                 @Override
-                public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+                public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                     Log.d(TAG, "onResponse: " + result);
                     if (result != OK) {
-                        openAuthorizationActivity(MainActivity.this);
+                        openAuthorizationActivity();
+                    } else {
+                        getName(email, password);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable t) {
                     Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
+                    withoutAccount();
                 }
             });
             request.makeRequest();
 
         } else {
-            openAuthorizationActivity(this);
+            openAuthorizationActivity();
         }
     }
 
@@ -427,9 +524,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+    public void withoutAccount() {
+        mFab.setVisibility(View.INVISIBLE);
+        mFabEvent.setVisibility(View.INVISIBLE);
+        mFabPlace.setVisibility(View.INVISIBLE);
+        mFabText.setVisibility(View.INVISIBLE);
+        LinearLayout navigation = findViewById(R.id.navigation_container);
+        navigation.removeAllViewsInLayout();
+        navigation.addView(getLayoutInflater().inflate(R.layout.nav_header_no_user, null));
+        navigation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAuthorizationActivity();
+            }
+        });
     }
 }

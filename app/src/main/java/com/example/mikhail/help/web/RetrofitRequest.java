@@ -1,5 +1,8 @@
 package com.example.mikhail.help.web;
 
+import android.content.Intent;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -17,12 +20,14 @@ public class RetrofitRequest {
         this.action = action;
     }
 
+    private static final String TAG = "RetrofitRequest";
+
     final static String
             ACTION = "action",
             RESULT = "result";
 
     String server = "https://mfomenko123.000webhostapp.com";
-    String action = "test";
+    String action = "test", nextAction = "";
     HashMap<String, String> postDataParams = new HashMap<>();
     RequestListener listener;
 
@@ -34,14 +39,23 @@ public class RetrofitRequest {
     Request req = retrofit.create(Request.class);
 
     public void makeRequest() {
-        postDataParams.put(ACTION, action);
+        postDataParams.put(action, nextAction);
         Call<Object> call = req.performPostCall(postDataParams);
         call.enqueue(new Callback<Object>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
-                HashMap<String, Double> map = gson.fromJson(response.body().toString(), HashMap.class);
-                Integer result = map.get(RESULT).intValue();
-                listener.onResponse(call, map, result);
+                String body = response.body().toString()
+                        .replace("{", "{" + '"')
+                        .replaceAll("=", '"' + "=" + '"')
+                        .replace("}", '"' + "}")
+                        .replaceAll(", ", '"' + ", " + '"');
+                try {
+                    HashMap<String, String> map = gson.fromJson(body, HashMap.class);
+                    Integer result = Integer.valueOf(map.get(RESULT).toString());
+                    listener.onResponse(call, map, result);
+                } catch (Exception e) {
+                    Log.d(TAG, "onResponse: " + response.body().toString() + " " + body);
+                }
             }
 
             @Override
@@ -49,6 +63,10 @@ public class RetrofitRequest {
                 listener.onFailure(call, t);
             }
         });
+    }
+
+    public void setNextAction(String nextAction) {
+        this.nextAction = nextAction;
     }
 
     public String getServer() {

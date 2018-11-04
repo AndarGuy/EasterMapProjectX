@@ -2,6 +2,7 @@ package com.example.mikhail.help;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.example.mikhail.help.web.RetrofitRequest;
 import java.util.HashMap;
 
 import retrofit2.Call;
+import retrofit2.http.GET;
 
 public class AuthorizationActivity extends AppCompatActivity {
 
@@ -56,7 +58,7 @@ public class AuthorizationActivity extends AppCompatActivity {
             INVALID_EMAIL = 2,
             LENGTH_ERROR = 1;
 
-    public final int OK = 0;
+    public final int OK = 0, CANCELED = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,14 +156,13 @@ public class AuthorizationActivity extends AppCompatActivity {
         }
     }
 
-    private int makeRequest(final String action, final String email, final String password) {
+    private void makeRequest(final String action, final String email, final String password) {
         final RetrofitRequest request = new RetrofitRequest(action);
-
         request.putParam(EMAIL, email);
         request.putParam(PASSWORD, password);
         request.setListener(new RequestListener() {
             @Override
-            public void onResponse(Call<Object> call, HashMap<String, Double> response, Integer result) {
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 switch (result) {
                     case OK:
                         SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
@@ -169,6 +170,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                         editor.putString(EMAIL, email);
                         editor.putString(PASSWORD, password);
                         editor.commit();
+                        setResult(RESULT_OK);
                         finish();
                         break;
                     case WRONG_EMAIL:
@@ -195,7 +197,6 @@ public class AuthorizationActivity extends AppCompatActivity {
             }
         });
         request.makeRequest();
-        return OK;
     }
 
     @Override
@@ -212,6 +213,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
+                                setResult(RESULT_CANCELED);
                                 finish();
                             }
                         });
