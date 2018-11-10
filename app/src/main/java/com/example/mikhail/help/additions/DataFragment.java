@@ -23,6 +23,7 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.example.mikhail.help.R;
+import com.example.mikhail.help.util.Utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,30 +33,24 @@ import java.util.Date;
 
 public class DataFragment extends Fragment {
 
-    public DataFragment() {
-
-    }
-
-    private static final String TAG = "DataFragment";
-
     public static final String
             KEY_NAME_MAX_LEN = "len_max",
             KEY_NAME_MIN_LEN = "len_min";
-
     static final int RESULT_OK = -1, REQUEST_TAKE_PHOTO = 1;
-
     static final byte NAME_MAX_LENGTH = 25, NAME_MIN_LENGTH = 4;
-
+    private static final String TAG = "DataFragment";
     byte nameMaxLength, nameMinLength;
-
     ImageView mImageView;
     String mCurrentPhotoPath;
-
     EditText description;
     TextView name;
     ViewSwitcher viewSwitcher;
-
     String nameString;
+    private OnDataFragmentDataListener mListener;
+
+    public DataFragment() {
+
+    }
 
     private void getBundles() {
         nameMaxLength = getArguments().getByte(KEY_NAME_MAX_LEN);
@@ -184,22 +179,20 @@ public class DataFragment extends Fragment {
         return v;
     }
 
-    public interface OnDataFragmentDataListener {
-        void OnSendName(String name);
-
-        void OnSendDescription(String description);
-
-        void OnSendImage(Bitmap image);
-    }
-
-    private OnDataFragmentDataListener mListener;
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnDataFragmentDataListener) {
             mListener = (OnDataFragmentDataListener) context;
         }
+    }
+
+    public interface OnDataFragmentDataListener {
+        void OnSendName(String name);
+
+        void OnSendDescription(String description);
+
+        void OnSendImage(Bitmap image);
     }
 
 }

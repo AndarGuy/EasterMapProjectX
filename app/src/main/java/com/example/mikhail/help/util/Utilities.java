@@ -3,14 +3,17 @@ package com.example.mikhail.help.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Base64;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
 
 public class Utilities {
 
@@ -45,9 +48,7 @@ public class Utilities {
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = (DrawableCompat.wrap(drawable)).mutate();
-        }
+        drawable = (DrawableCompat.wrap(drawable)).mutate();
 
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -56,6 +57,51 @@ public class Utilities {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    public static String getStringImage(Bitmap bmp) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        byte[] imageBytes = outputStream.toByteArray();
+        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    public static Bitmap resizeBitMapImage(String filePath, int targetWidth,
+                                            int targetHeight) {
+        Bitmap bitMapImage = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+        double sampleSize = 0;
+        Boolean scaleByHeight = Math.abs(options.outHeight - targetHeight) >= Math
+                .abs(options.outWidth - targetWidth);
+
+        if (options.outHeight * options.outWidth * 2 >= 1638) {
+            sampleSize = scaleByHeight ? options.outHeight / targetHeight
+                    : options.outWidth / targetWidth;
+            sampleSize = (int) Math.pow(2d,
+                    Math.floor(Math.log(sampleSize) / Math.log(2d)));
+        }
+
+        options.inJustDecodeBounds = false;
+        options.inTempStorage = new byte[128];
+        while (true) {
+            try {
+                options.inSampleSize = (int) sampleSize;
+                bitMapImage = BitmapFactory.decodeFile(filePath, options);
+
+                break;
+            } catch (Exception ex) {
+                try {
+                    sampleSize = sampleSize * 2;
+                } catch (Exception ex1) {
+
+                }
+            }
+        }
+
+        return bitMapImage;
     }
 
 }

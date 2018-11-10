@@ -6,15 +6,18 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mikhail.help.R;
 import com.example.mikhail.help.util.CustomViewPager;
+import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.util.ViewPagerAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -28,18 +31,16 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     private TextView hint;
 
     private LatLng position;
-    private String name, description, code;
+    private String name, description, type;
     private Bitmap image;
 
-    private byte maxNameLength = 25, minNameLength = 4;
+    private final byte maxNameLength = 25, minNameLength = 4;
 
-    private int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
+    private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
             R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
             R.drawable.ic_egg_easter};
 
-    private String[] mThumbCodes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
-
-    private String[] hints;
+    private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
 
 
     @Override
@@ -64,7 +65,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
     @Override
     public void OnSendCode(String code) {
-        this.code = code;
+        this.type = code;
     }
 
     @Override
@@ -74,9 +75,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
         elementsLoad();
 
-        hints = getResources().getStringArray(R.array.add_place_hints);
-
-        hint.setText(hints[0]);
+        hint.setText(getResources().getStringArray(R.array.add_place_hints)[0]);
         hint.animate().setDuration(6000).alpha(0);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -87,7 +86,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
             @Override
             public void onPageSelected(int position) {
-                hint.setText(hints[position]);
+                hint.setText(getResources().getStringArray(R.array.add_place_hints)[position]);
                 hint.animate().cancel();
                 hint.setAlpha(1);
             }
@@ -141,6 +140,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                     tabLayout.getTabAt(tabLayout.getSelectedTabPosition() + 1).select();
                 } else {
                     //finish();
+                    Log.d(TAG, "onClick: " + Utilities.getStringImage(image) + " " + image.getByteCount());
                 }
             }
         });
@@ -198,7 +198,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     }
 
     private void sendTypeBundles(Bundle bundle, TypeFragment fragment) {
-        bundle.putStringArray(fragment.KEY_THUMB_CODES, mThumbCodes);
+        bundle.putStringArray(fragment.KEY_THUMB_CODES, mThumbTypes);
         bundle.putIntArray(fragment.KEY_THUMB_IDS, mThumbIds);
         bundle.putStringArray(fragment.KEY_THUMB_NAMES, getResources().getStringArray(R.array.types_places));
 

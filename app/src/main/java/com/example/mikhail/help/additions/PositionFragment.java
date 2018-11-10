@@ -74,7 +74,7 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
         mMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.map_style)));
         mMap.getUiSettings().setAllGesturesEnabled(false);
 
-        mMap.addCircle(new CircleOptions().center(zeroLocation).fillColor(Color.argb(80, 0, 0, 0)).strokeWidth(10).strokeColor(Color.rgb(149, 149, 149)).radius(80));
+        mMap.addCircle(new CircleOptions().center(zeroLocation).fillColor(Color.argb(80, 0, 0, 0)).strokeWidth(10).strokeColor(Color.rgb(149, 149, 149)).radius(110));
 
         GroundOverlayOptions overlayOptions = new GroundOverlayOptions().image(BitmapDescriptorFactory.fromBitmap(Utilities.getBitmapFromVectorDrawable(this.getContext(), R.drawable.location_bg))).position(zeroLocation, 15f, 15f);
 

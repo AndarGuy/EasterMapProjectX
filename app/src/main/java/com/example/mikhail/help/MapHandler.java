@@ -12,15 +12,19 @@ import android.util.Log;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.Utilities;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -106,6 +110,7 @@ public class MapHandler implements OnMapReadyCallback {
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
+        mMap.setOnCameraIdleListener(onCameraIdleListener);
         mMap.setMapStyle(new MapStyleOptions(context.getResources().getString(R.string.map_style)));
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             mMap.setMyLocationEnabled(true);
@@ -130,6 +135,15 @@ public class MapHandler implements OnMapReadyCallback {
             mMap.animateCamera(cameraUpdate);
         }
     }
+
+    GoogleMap.OnCameraIdleListener onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
+        @Override
+        public void onCameraIdle() {
+            VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
+            LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
+            Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
+        }
+    };
 
     GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override

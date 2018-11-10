@@ -2,11 +2,9 @@ package com.example.mikhail.help;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,41 +22,31 @@ import com.example.mikhail.help.web.RetrofitRequest;
 import java.util.HashMap;
 
 import retrofit2.Call;
-import retrofit2.http.GET;
 
 public class AuthorizationActivity extends AppCompatActivity {
 
-    private final String TAG = "AuthorizationActivity";
-
-    private final String
-            PASSWORD = "password",
-            EMAIL = "email",
-            LOGIN = "login",
-            REGISTER = "register";
-
     public static final String APP_PREFERENCES = "config";
-
-    private Button registerButton, loginButton;
-
-    private AutoCompleteTextView emailView, passwordView;
-
-    private TextView emailInfo, passwordInfo;
-
     public final int
             MAX_PASSWORD_LENGTH = 32,
             MIN_PASSWORD_LENGTH = 6;
-
     public final int
             WRONG_EMAIL = 1,
             WRONG_PASSWORD = 2,
             ALREADY_REGISTERED = 3,
             SQL_ERROR = 4;
-
     public final int
             INVALID_EMAIL = 2,
             LENGTH_ERROR = 1;
-
-    public final int OK = 0, CANCELED = 1;
+    public final int OK = 0;
+    private final String TAG = "AuthorizationActivity";
+    private final String
+            PASSWORD = "password",
+            EMAIL = "email",
+            LOGIN = "login",
+            REGISTER = "register";
+    private Button registerButton, loginButton;
+    private AutoCompleteTextView emailView, passwordView;
+    private TextView emailInfo, passwordInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,9 +145,7 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     private void makeRequest(final String action, final String email, final String password) {
-        final RetrofitRequest request = new RetrofitRequest(action);
-        request.putParam(EMAIL, email);
-        request.putParam(PASSWORD, password);
+        RetrofitRequest request = new RetrofitRequest(action, email, password);
         request.setListener(new RequestListener() {
             @Override
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {

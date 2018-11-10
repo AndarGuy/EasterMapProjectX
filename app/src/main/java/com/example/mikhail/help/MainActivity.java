@@ -27,7 +27,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -43,7 +42,6 @@ import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -54,9 +52,7 @@ import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
-    MainListener listener;
-    MapHandler mapHandler = new MapHandler(this);
-
+    public static final String APP_PREFERENCES = "config";
     private final String TAG = "MainActivity";
     private final int ERROR_DIALOG_REQUEST = 9001;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -72,25 +68,33 @@ public class MainActivity extends AppCompatActivity {
             PASSWORD = "password",
             EMAIL = "email",
             LOGIN = "login";
-    private final int REQUEST_ACCOUNT = 2;
-    private final int OK = 0;
-    public static final String APP_PREFERENCES = "config";
-
+    private final int REQUEST_ACCOUNT = 2, OK = 0;
+    public boolean mLocationPermissionGranted = false;
+    public boolean userAuthorized = false;
+    protected GeoDataClient mGeoDataClient;
+    MainListener listener;
+    MapHandler mapHandler = new MapHandler(this);
+    private String email, password;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mBarDrawerToggle;
     private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
     private FrameLayout mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide;
     private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
-    private TextView nameView;
-
+    private TextView mNameView;
     private PlaceAutocompleteAdapter mAdapter;
-    protected GeoDataClient mGeoDataClient;
-
-    public boolean mLocationPermissionGranted = false;
-    public boolean userAuthorized = false;
 
 
     //-------------MAIN-------------
+
+    public static boolean isNetworkConnected(Context context) {
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        return networkInfo != null && networkInfo.isConnected();
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,12 +162,20 @@ public class MainActivity extends AppCompatActivity {
         mFabPlaceSide = findViewById(R.id.fabPlaceSide);
         mFabEventSide = findViewById(R.id.fabEventSide);
         mFabTextSide = findViewById(R.id.fabTextSide);
-        nameView = findViewById(R.id.name);
+        mNameView = findViewById(R.id.name);
     }
+
+    //-------------TOOLBAR-------------
 
     private void elementsSetListeners() {
         Log.d(TAG, "elementsSetListeners: calls");
-        mNameEditLayout.setOnClickListener(listener.onClickName);
+        mNameEditLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showNameLoading();
+                generateName(email, password);
+            }
+        });
         mDrawerLayout.addDrawerListener(mBarDrawerToggle);
         mProfileImageContainer.setOnClickListener(listener.onClickProfileImage);
         mFindsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
@@ -176,9 +188,6 @@ public class MainActivity extends AppCompatActivity {
         mFabEvent.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
         mFabText.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
     }
-
-    //-------------TOOLBAR-------------
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -205,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         final AutoCompleteTextView textView = new AutoCompleteTextView(this);
 
         LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-        final LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(getResources().getDisplayMetrics().widthPixels - (dp16 * 8), LinearLayout.LayoutParams.MATCH_PARENT);
 
         linearLayout.setLayoutParams(linearLayoutParams);
@@ -273,6 +282,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void searchClose(AutoCompleteTextView textView, ImageView imageView) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(1, 0);
+        textView.clearFocus();
         textView.setScaleX(0f);
         textView.setEnabled(false);
         imageView.setImageDrawable(getDrawable(R.drawable.ic_search));
@@ -290,6 +302,8 @@ public class MainActivity extends AppCompatActivity {
         imm.showSoftInput(textView, 0);
     }
 
+    //-----------PERMISSIONS-----------
+
     private void toolbarLoad() {
 
         Toolbar myToolbar = findViewById(R.id.toolbar);
@@ -300,8 +314,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
-
-    //-----------PERMISSIONS-----------
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -324,6 +336,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //------------MAP UTILS------------
+
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permission.");
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -338,8 +352,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //------------MAP UTILS------------
-
     private void mapLoad() {
         Log.d(TAG, "mapLoad: map loading");
 
@@ -349,6 +361,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "mapLoad: map loaded");
 
     }
+
+    //-------------ACCOUNT-------------
 
     public boolean isServicesOK() {
 
@@ -370,20 +384,20 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    //-------------ACCOUNT-------------
-
     public void userAuthorize() {
         RetrofitRequest request = new RetrofitRequest(ACTION_TEST);
         request.setListener(new RequestListener() {
             @Override
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                Log.d(TAG, "onResponse: Server online");
                 userLogin();
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
                 Toast.makeText(MainActivity.this, getString(R.string.server_not_online), Toast.LENGTH_SHORT).show();
-
+                Log.d(TAG, "onFailure: Server connection failed, because " + t.toString());
+                withoutAccount();
             }
         });
         request.makeRequest();
@@ -399,7 +413,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode);
         if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_CANCELED) withoutAccount();
-        else if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_OK) MainActivity.this.recreate();
+        else if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_OK)
+            MainActivity.this.recreate();
     }
 
     public void openInternetConnection(Context context) {
@@ -407,32 +422,51 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void showName(String name) {
+        mNameEditLayout.setEnabled(true);
+        String formattedName = "";
+        try {
+            for (String s : name.split("_")) {
+                if (s.length() > 1) {
+                    formattedName += String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1);
+                } else {
+                    formattedName += s.toUpperCase();
+                }
+            }
+            mNameView.setText(formattedName);
+        } catch (Exception e) {
+            Log.d(TAG, "onNickFormatting: formatting error! " + e.toString());
+            mNameView.setText(name);
+        }
+    }
+    private void showNameLoading() {
+        mNameView.setText(getString(R.string.loading));
+        mNameEditLayout.setEnabled(false);
+    }
+
     private void generateName(final String email, final String password) {
-        RetrofitRequest request = new RetrofitRequest(NAME);
-        request.setNextAction(ACTION_GENERATE);
-        request.putParam(EMAIL, email);
-        request.putParam(PASSWORD, password);
+        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_GENERATE, email, password);
         request.setListener(new RequestListener() {
             @Override
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 if (result == OK) {
-                    setName(email, password, response.get(NAME).toString());
+                    Log.d(TAG, "onResponse: generated name: " + response.get(NAME));
+                    showName(response.get(NAME));
+                } else {
+                    openAuthorizationActivity();
                 }
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-                Log.d(TAG, "onResponse: nick generate error!");
+                Log.d(TAG, "onResponse: nick generation error! error: " + t.toString());
             }
         });
         request.makeRequest();
     }
 
     private void setName(final String email, final String password, final String new_name) {
-        RetrofitRequest request = new RetrofitRequest(NAME);
-        request.setNextAction(ACTION_SET);
-        request.putParam(EMAIL, email);
-        request.putParam(PASSWORD, password);
+        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_SET, email, password);
         request.putParam(NEW_NAME, new_name);
         request.setListener(new RequestListener() {
             @Override
@@ -440,36 +474,33 @@ public class MainActivity extends AppCompatActivity {
                 if (result == OK) {
                     if (result == OK) {
                         Log.d(TAG, "onResponse: nick change to " + new_name);
-                        getName(email, password);
+                        showName(new_name);
+                    } else {
+                        Log.d(TAG, "onResponse: nick change error! " + result);
+                        openAuthorizationActivity();
                     }
-                    else Log.d(TAG, "onResponse: nick change error!");
                 }
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-                Log.d(TAG, "onResponse: nick change error!");
+                Log.d(TAG, "onResponse: nick change error! error: " + t.toString());
             }
         });
         request.makeRequest();
     }
 
     private void getName(final String email, final String password) {
-        RetrofitRequest request = new RetrofitRequest(NAME);
-        request.setNextAction(ACTION_GET);
-        request.putParam(EMAIL, email);
-        request.putParam(PASSWORD, password);
+        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_GET, email, password);
         request.setListener(new RequestListener() {
             @Override
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 if (result == OK) {
-                    String name = String.valueOf(response.get(NAME));
-                    if (name.length() == 0) {
-                        generateName(email, password);
-                    } else {
-                        nameView.setText(name);
-                        Log.d(TAG, "onResponse: gotten name is " + name);
-                    }
+
+                    Log.d(TAG, "onResponse: gotten name is " + response.get(NAME));
+                    showName(response.get(NAME));
+                } else {
+                    openAuthorizationActivity();
                 }
             }
 
@@ -481,13 +512,14 @@ public class MainActivity extends AppCompatActivity {
         request.makeRequest();
     }
 
+    //APPEARANCE
+
     public void userLogin() {
         SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
         if (preferences.contains(PASSWORD) && preferences.contains(EMAIL)) {
-            RetrofitRequest request = new RetrofitRequest(LOGIN);
-            final String email = preferences.getString(EMAIL, null), password = preferences.getString(PASSWORD, null);
-            request.putParam(EMAIL, email);
-            request.putParam(PASSWORD, password);
+            email = preferences.getString(EMAIL, null);
+            password = preferences.getString(PASSWORD, null);
+            RetrofitRequest request = new RetrofitRequest(LOGIN, email, password);
             request.setListener(new RequestListener() {
                 @Override
                 public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
@@ -510,18 +542,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             openAuthorizationActivity();
         }
-    }
-
-    //APPEARANCE
-
-    public static boolean isNetworkConnected(Context context) {
-
-        ConnectivityManager connectivityManager = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-        return networkInfo != null && networkInfo.isConnected();
-
     }
 
     public void withoutAccount() {

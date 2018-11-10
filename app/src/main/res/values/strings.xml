@@ -2,7 +2,7 @@
     <string name="app_name">Help</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
-    <string name="profile_name">Loading...</string>
+    <string name="loading">Loading...</string>
     <string name="press_to_edit">Press to edit</string>
     <string name="map">Map</string>
     <string name="my_finds">My finds</string>
