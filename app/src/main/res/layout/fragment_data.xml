@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainPlaceDataLayout"
+    android:id="@+id/mainDataLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".additions.DataFragment">
 
     <FrameLayout
+        android:id="@+id/imageBackground"
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:background="#BDBDBD"
@@ -54,18 +55,18 @@
         android:orientation="horizontal">
 
         <ViewSwitcher
-            android:id="@+id/placeViewSwitcher"
+            android:id="@+id/viewSwitcher"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom">
 
             <LinearLayout
-                android:id="@+id/placeNameTextLayout"
+                android:id="@+id/nameTextLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/placeNameText"
+                    android:id="@+id/nameText"
                     style="@style/Text.NameTitle.Dark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -73,7 +74,7 @@
                     android:textAllCaps="true" />
 
                 <ImageView
-                    android:id="@+id/placeNameEditButton"
+                    android:id="@+id/nameEditButton"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_gravity="center"
@@ -83,18 +84,18 @@
             </LinearLayout>
 
             <EditText
-                android:id="@+id/placeNameTextEdit"
+                android:id="@+id/nameTextEdit"
                 style="@style/Text.NameTitle.Dark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:background="@null"
                 android:focusable="true"
-                android:gravity="bottom"
-                android:layout_gravity="bottom"
                 android:focusableInTouchMode="true"
+                android:gravity="bottom"
                 android:imeOptions="actionNext"
-                android:maxLines="1"
-                android:inputType="text" />
+                android:inputType="text"
+                android:maxLines="1" />
 
 
         </ViewSwitcher>
@@ -106,9 +107,9 @@
         style="@style/Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
         android:backgroundTint="@color/colorPrimary"
         android:fontFamily="@font/roboto"
         android:hint="@string/description"
@@ -121,8 +122,8 @@
         android:id="@+id/charsCounter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:fontFamily="@font/roboto"
         android:gravity="end"
         android:textColor="#9A9A9A"

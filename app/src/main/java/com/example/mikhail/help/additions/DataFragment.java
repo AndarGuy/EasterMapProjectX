@@ -100,10 +100,14 @@ public class DataFragment extends Fragment {
 
     private void setPic() {
         Log.d(TAG, "setPic: " + mImageView.getMeasuredWidth() + " " + mImageView.getWidth());
+        Bitmap compressedBitmap;
         BitmapFactory.decodeFile(mCurrentPhotoPath);
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
         mImageView.setImageBitmap(bitmap);
-        mListener.OnSendImage(bitmap);
+        if (bitmap.getWidth() > bitmap.getHeight())
+            compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 480, 320);
+        else compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 320, 480);
+        mListener.OnSendImage(compressedBitmap);
     }
 
     @Override
@@ -117,8 +121,8 @@ public class DataFragment extends Fragment {
     private void elementsLoad(View v) {
         mImageView = v.findViewById(R.id.myImage);
         description = v.findViewById(R.id.descriptionInput);
-        name = v.findViewById(R.id.placeNameText);
-        viewSwitcher = v.findViewById(R.id.placeViewSwitcher);
+        name = v.findViewById(R.id.nameText);
+        viewSwitcher = v.findViewById(R.id.viewSwitcher);
     }
 
     @Override

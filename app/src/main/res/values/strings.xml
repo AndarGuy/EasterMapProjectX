@@ -52,6 +52,8 @@
     <string name="add_photo">Add Photo</string>
     <string name="press_to_take_photo">Press to take photo</string>
     <string name="name_of_place">Name of thing</string>
+    <string name="place_added">Place added!</string>
+    <string name="place_adding_error">Place not added!</string>
     <string name="description">Description</string>
     <string name="tags">Tags (#fun #super... etc)</string>
     <string name="need_from_to_symbols">%name% length must been from %from% to %to% characters!</string>

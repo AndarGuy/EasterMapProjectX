@@ -68,7 +68,7 @@ public class Utilities {
     }
 
     public static Bitmap resizeBitMapImage(String filePath, int targetWidth,
-                                            int targetHeight) {
+                                           int targetHeight) {
         Bitmap bitMapImage = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

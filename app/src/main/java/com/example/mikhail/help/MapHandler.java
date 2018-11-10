@@ -9,19 +9,15 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.ListAdapter;
 import android.widget.Toast;
 
-import com.example.mikhail.help.util.Utilities;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
@@ -34,20 +30,35 @@ import java.util.List;
 
 public class MapHandler implements OnMapReadyCallback {
 
+    private static final String TAG = "MapHandler";
+    private static final float DEFAULT_ZOOM = 15f;
+    private static final String ANIMATED_MOVE = "Animated";
+    private static final String DEFAULT_MOVE = "Default";
+    public Location location;
+    private GoogleMap mMap;
+    GoogleMap.OnCameraIdleListener onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
+        @Override
+        public void onCameraIdle() {
+            VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
+            LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
+            Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
+        }
+    };
+    GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
+        @Override
+        public void onMyLocationClick(@NonNull Location location) {
+            float currentZoom = mMap.getCameraPosition().zoom;
+            if (currentZoom < DEFAULT_ZOOM)
+                moveCameraToLocation(location, DEFAULT_ZOOM, ANIMATED_MOVE);
+            else moveCameraToLocation(location, currentZoom, ANIMATED_MOVE);
+        }
+    };
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private Context context;
+
     public MapHandler(Context context) {
         this.context = context;
     }
-
-    private static final String TAG = "MapHandler";
-    private static final float DEFAULT_ZOOM = 15f;
-
-    private static final String ANIMATED_MOVE = "Animated";
-    private static final String DEFAULT_MOVE = "Default";
-
-    private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private Context context;
-    public Location location;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -135,25 +146,6 @@ public class MapHandler implements OnMapReadyCallback {
             mMap.animateCamera(cameraUpdate);
         }
     }
-
-    GoogleMap.OnCameraIdleListener onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
-        @Override
-        public void onCameraIdle() {
-            VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
-            LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
-            Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
-        }
-    };
-
-    GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
-        @Override
-        public void onMyLocationClick(@NonNull Location location) {
-            float currentZoom = mMap.getCameraPosition().zoom;
-            if (currentZoom < DEFAULT_ZOOM)
-                moveCameraToLocation(location, DEFAULT_ZOOM, ANIMATED_MOVE);
-            else moveCameraToLocation(location, currentZoom, ANIMATED_MOVE);
-        }
-    };
 
     private void moveCameraToLocation(Location location, float zoom, String move) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + location.getLatitude() + ", lng: " + location.getLongitude());

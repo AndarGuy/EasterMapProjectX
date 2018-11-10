@@ -1,5 +1,6 @@
 package com.example.mikhail.help.additions;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -11,37 +12,50 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mikhail.help.R;
 import com.example.mikhail.help.util.CustomViewPager;
 import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.util.ViewPagerAdapter;
+import com.example.mikhail.help.web.RequestListener;
+import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
 
 public class AddPlaceActivity extends AppCompatActivity implements PositionFragment.OnPositionFragmentDataListener, TypeFragment.OnTypeFragmentDataListener, DataFragment.OnDataFragmentDataListener {
 
+    public static final String APP_PREFERENCES = "config";
     private static final String TAG = "AddPlaceActivity";
-
+    private final String
+            LONGITUDE = "longitude",
+            LATITUDE = "latitude",
+            IMAGE = "image",
+            TYPE = "type",
+            DESCRIPTION = "description",
+            NAME = "new_name",
+            PLACE = "place",
+            ADD = "add",
+            EMAIL = "email",
+            PASSWORD = "password";
+    private final int OK = 0;
+    private final byte maxNameLength = 25, minNameLength = 4;
+    private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
+            R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
+            R.drawable.ic_egg_easter};
+    private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
     private Button buttonBack, buttonNext;
     private TabLayout tabLayout;
     private CustomViewPager viewPager;
     private TextView hint;
-
     private LatLng position;
     private String name, description, type;
     private Bitmap image;
-
-    private final byte maxNameLength = 25, minNameLength = 4;
-
-    private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
-            R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
-            R.drawable.ic_egg_easter};
-
-    private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
-
 
     @Override
     public void OnSendName(String name) {
@@ -120,6 +134,16 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
         buttonNext = findViewById(R.id.buttonNext);
     }
 
+    private void shakeView(final View v) {
+        v.animate().cancel();
+        v.animate().scaleY(0.9f).scaleX(0.9f).setDuration(100).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                v.animate().scaleX(1).scaleY(1).setDuration(100);
+            }
+        }).start();
+    }
+
     private void elementsSetListeners() {
 
         buttonBack.setOnClickListener(new View.OnClickListener() {
@@ -139,8 +163,40 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                 if (tabLayout.getSelectedTabPosition() < tabLayout.getTabCount() - 1) {
                     tabLayout.getTabAt(tabLayout.getSelectedTabPosition() + 1).select();
                 } else {
-                    //finish();
-                    Log.d(TAG, "onClick: " + Utilities.getStringImage(image) + " " + image.getByteCount());
+                    if (type == null)
+                        tabLayout.getTabAt(tabLayout.getSelectedTabPosition() - 1).select();
+                    else if (image == null) shakeView(findViewById(R.id.imageBackground));
+                    else if (name == null) shakeView(findViewById(R.id.nameTextLayout));
+                    else if (description == null) shakeView(findViewById(R.id.descriptionInput));
+                    else {
+                        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+                        RetrofitRequest request = new RetrofitRequest(PLACE, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
+                        request.putParam(NAME, name);
+                        request.putParam(DESCRIPTION, description);
+                        request.putParam(TYPE, type);
+                        request.putParam(IMAGE, Utilities.getStringImage(image));
+                        request.putParam(LATITUDE, String.valueOf(position.latitude));
+                        request.putParam(LONGITUDE, String.valueOf(position.longitude));
+                        request.setListener(new RequestListener() {
+                            @Override
+                            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                                if (result == OK) {
+                                    Log.d(TAG, "onResponse: place added");
+                                    Toast.makeText(AddPlaceActivity.this, getString(R.string.place_added), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Log.d(TAG, "onResponse: error: " + result);
+                                    Toast.makeText(AddPlaceActivity.this, getString(R.string.place_adding_error), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Object> call, Throwable t) {
+                                Log.d(TAG, "onFailure: adding place error: " + t.toString());
+                            }
+                        });
+                        request.makeRequest();
+                        finish();
+                    }
                 }
             }
         });

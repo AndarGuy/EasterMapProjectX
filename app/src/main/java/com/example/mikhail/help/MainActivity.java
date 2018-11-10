@@ -439,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
             mNameView.setText(name);
         }
     }
+
     private void showNameLoading() {
         mNameView.setText(getString(R.string.loading));
         mNameEditLayout.setEnabled(false);
