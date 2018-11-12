@@ -11,6 +11,8 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.mikhail.help.web.RequestListener;
+import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
@@ -26,7 +28,10 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import retrofit2.Call;
 
 public class MapHandler implements OnMapReadyCallback {
 
@@ -34,17 +39,20 @@ public class MapHandler implements OnMapReadyCallback {
     private static final float DEFAULT_ZOOM = 15f;
     private static final String ANIMATED_MOVE = "Animated";
     private static final String DEFAULT_MOVE = "Default";
+    private final String
+            TO_Y = "to_y",
+            TO_X = "to_x",
+            FROM_Y = "from_y",
+            FROM_X = "from_x",
+            LONGITUDE = "longitude",
+            LATITUDE = "latitude",
+            PLACE = "place",
+            GET = "get",
+            EMAIL = "email",
+            PASSWORD = "password";
     public Location location;
     private GoogleMap mMap;
-    GoogleMap.OnCameraIdleListener onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
-        @Override
-        public void onCameraIdle() {
-            VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
-            LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
-            Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
-        }
-    };
-    GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
+    private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
         public void onMyLocationClick(@NonNull Location location) {
             float currentZoom = mMap.getCameraPosition().zoom;
@@ -109,10 +117,6 @@ public class MapHandler implements OnMapReadyCallback {
         this.location = location;
     }
 
-    public LatLng getCameraPosition() {
-        return mMap.getCameraPosition().target;
-    }
-
     private void mapSetup() {
         Log.d(TAG, "mapSetup: setup starting");
         mMap.getUiSettings().setRotateGesturesEnabled(false);
@@ -121,7 +125,32 @@ public class MapHandler implements OnMapReadyCallback {
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
-        mMap.setOnCameraIdleListener(onCameraIdleListener);
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
+                LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
+                final Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
+                RetrofitRequest request = new RetrofitRequest(PLACE, GET);
+                request.putParam(FROM_X, x1.toString());
+                request.putParam(FROM_Y, y1.toString());
+                request.putParam(TO_X, x2.toString());
+                request.putParam(TO_Y, y2.toString());
+                request.setListener(new RequestListener() {
+                    @Override
+                    public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                        Log.d(TAG, "onResponse: " + response.keySet().toString());
+                        Log.d(TAG, "onResponse: FROM_X: " + x1 + " TO_X: " + x2 + " FROM_Y: " + y1 + " TO_Y: " + y2);
+                    }
+
+                    @Override
+                    public void onFailure(Call<Object> call, Throwable t) {
+                        Log.d(TAG, "onFailure: errorrrrrrrr!!!!" + t.toString() + " " + t.getMessage());
+                    }
+                });
+                request.makeRequest();
+            }
+        });
         mMap.setMapStyle(new MapStyleOptions(context.getResources().getString(R.string.map_style)));
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             mMap.setMyLocationEnabled(true);

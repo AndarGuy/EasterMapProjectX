@@ -18,7 +18,7 @@ public class RetrofitRequest {
     private static final String TAG = "RetrofitRequest";
 
     final String RESULT = "result", EMAIL = "email", PASSWORD = "password";
-    String server = "https://mfomenko123.000webhostapp.com";
+    String server = "http://andarguy.me";
     String action, nextAction;
     String email, password;
     HashMap<String, String> postDataParams = new HashMap<>();
@@ -70,7 +70,7 @@ public class RetrofitRequest {
                     Integer result = Integer.valueOf(map.get(RESULT));
                     listener.onResponse(call, map, result);
                 } catch (Exception e) {
-                    Log.e(TAG, "onResponse: " + body, e);
+                    Log.e(TAG, "onResponse: " + body + "\n" + response.body(), e);
                     listener.onFailure(call, e);
                 }
             }
