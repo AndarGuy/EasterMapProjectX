@@ -48,7 +48,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
             R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
             R.drawable.ic_egg_easter};
-    private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EE"};
+    private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
     private Button buttonBack, buttonNext;
     private TabLayout tabLayout;
     private CustomViewPager viewPager;

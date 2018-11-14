@@ -5,6 +5,12 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -67,6 +73,20 @@ public class Utilities {
         return encodedImage;
     }
 
+    public static Bitmap decodeBase64(String input) {
+        byte[] decodedByte = Base64.decode(input, 0);
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+    }
+
+    public static Bitmap tintImage(Bitmap bitmap, int color) {
+        Paint paint = new Paint();
+        paint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+        Bitmap bitmapResult = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmapResult);
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        return bitmapResult;
+    }
+
     public static Bitmap resizeBitMapImage(String filePath, int targetWidth,
                                            int targetHeight) {
         Bitmap bitMapImage = null;
@@ -102,6 +122,60 @@ public class Utilities {
         }
 
         return bitMapImage;
+    }
+
+    public static Bitmap getCircledBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
+
+    public static Bitmap addBorderToRoundedBitmap(Bitmap srcBitmap, int cornerRadius, int borderWidth, int borderColor){
+        borderWidth = borderWidth*2;
+
+        Bitmap dstBitmap = Bitmap.createBitmap(
+                srcBitmap.getWidth() + borderWidth,
+                srcBitmap.getHeight() + borderWidth,
+                Bitmap.Config.ARGB_8888
+        );
+
+        Canvas canvas = new Canvas(dstBitmap);
+
+        Paint paint = new Paint();
+        paint.setColor(borderColor);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(borderWidth);
+        paint.setAntiAlias(true);
+
+        Rect rect = new Rect(
+                borderWidth/2,
+                borderWidth/2,
+                dstBitmap.getWidth() - borderWidth/2,
+                dstBitmap.getHeight() - borderWidth/2
+        );
+
+        RectF rectF = new RectF(rect);
+
+        canvas.drawRoundRect(rectF,cornerRadius,cornerRadius,paint);
+
+        canvas.drawBitmap(srcBitmap, borderWidth / 2, borderWidth / 2, null);
+
+        srcBitmap.recycle();
+
+        return dstBitmap;
     }
 
 }

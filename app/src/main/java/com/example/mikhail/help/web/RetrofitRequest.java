@@ -61,16 +61,12 @@ public class RetrofitRequest {
         call.enqueue(new Callback<Object>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
-                String body = response.body().toString()
-                        .replaceAll("=", "=" + '"')
-                        .replace("}", '"' + "}")
-                        .replaceAll(", ", '"' + ", ");
                 try {
-                    HashMap<String, String> map = gson.fromJson(body, HashMap.class);
+                    HashMap<String, String> map = gson.fromJson(gson.toJson(response.body()), HashMap.class);
                     Integer result = Integer.valueOf(map.get(RESULT));
                     listener.onResponse(call, map, result);
                 } catch (Exception e) {
-                    Log.e(TAG, "onResponse: " + body + "\n" + response.body(), e);
+                    Log.e(TAG, "onResponse: " + response.body() + " " + gson.toJson(response.body()), e);
                     listener.onFailure(call, e);
                 }
             }

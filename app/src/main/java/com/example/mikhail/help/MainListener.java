@@ -31,13 +31,6 @@ public class MainListener {
 
     boolean isFabMenuOpen = false;
 
-    View.OnClickListener onClickName = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            // Do something for onClickName
-        }
-    };
-
     View.OnClickListener onClickProfileImage = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
