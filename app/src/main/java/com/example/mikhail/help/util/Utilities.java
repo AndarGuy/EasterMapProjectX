@@ -143,8 +143,8 @@ public class Utilities {
         return output;
     }
 
-    public static Bitmap addBorderToRoundedBitmap(Bitmap srcBitmap, int cornerRadius, int borderWidth, int borderColor){
-        borderWidth = borderWidth*2;
+    public static Bitmap addBorderToRoundedBitmap(Bitmap srcBitmap, int cornerRadius, int borderWidth, int borderColor) {
+        borderWidth = borderWidth * 2;
 
         Bitmap dstBitmap = Bitmap.createBitmap(
                 srcBitmap.getWidth() + borderWidth,
@@ -161,15 +161,15 @@ public class Utilities {
         paint.setAntiAlias(true);
 
         Rect rect = new Rect(
-                borderWidth/2,
-                borderWidth/2,
-                dstBitmap.getWidth() - borderWidth/2,
-                dstBitmap.getHeight() - borderWidth/2
+                borderWidth / 2,
+                borderWidth / 2,
+                dstBitmap.getWidth() - borderWidth / 2,
+                dstBitmap.getHeight() - borderWidth / 2
         );
 
         RectF rectF = new RectF(rect);
 
-        canvas.drawRoundRect(rectF,cornerRadius,cornerRadius,paint);
+        canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
 
         canvas.drawBitmap(srcBitmap, borderWidth / 2, borderWidth / 2, null);
 

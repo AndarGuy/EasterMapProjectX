@@ -12,35 +12,35 @@ import android.view.ViewGroup;
 
 import com.example.mikhail.help.R;
 import com.example.mikhail.help.util.Utilities;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.maps.android.SphericalUtil;
 
 public class PositionFragment extends Fragment implements OnMapReadyCallback {
-
-    public PositionFragment() {
-
-    }
-
-    private static final String TAG = "PositionFragment";
 
     public static final String
             KEY_LATITUDE = "lat",
             KEY_LONGITUDE = "lng",
             KEY_RADIUS = "r";
-
+    public static final int MAX_RADIUS = 110;
+    private static final String TAG = "PositionFragment";
     private GoogleMap mMap;
     private Double latitude, longitude, radius;
     private LatLng zeroLocation;
+    private OnPositionFragmentDataListener mListener;
+
+    public PositionFragment() {
+
+    }
 
     private void getBundles() {
         latitude = getArguments().getDouble(KEY_LATITUDE);
@@ -49,7 +49,6 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
 
         zeroLocation = new LatLng(latitude, longitude);
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,7 +73,7 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
         mMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.map_style)));
         mMap.getUiSettings().setAllGesturesEnabled(false);
 
-        mMap.addCircle(new CircleOptions().center(zeroLocation).fillColor(Color.argb(80, 0, 0, 0)).strokeWidth(10).strokeColor(Color.rgb(149, 149, 149)).radius(110));
+        mMap.addCircle(new CircleOptions().center(zeroLocation).fillColor(Color.argb(80, 0, 0, 0)).strokeWidth(10).strokeColor(Color.rgb(149, 149, 149)).radius(MAX_RADIUS));
 
         GroundOverlayOptions overlayOptions = new GroundOverlayOptions().image(BitmapDescriptorFactory.fromBitmap(Utilities.getBitmapFromVectorDrawable(this.getContext(), R.drawable.location_bg))).position(zeroLocation, 15f, 15f);
 
@@ -84,40 +83,16 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
 
             @Override
             public void onMapClick(LatLng latLng) {
-                Double x0 = zeroLocation.latitude, y0 = zeroLocation.longitude, x1 = latLng.latitude, y1 = latLng.longitude;
-                if (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)) > 0.001) {
-                    double new_x, new_y;
-                    if (x1 >= x0) {
-                        new_x = ((radius * Math.abs(x1 - x0)) / (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)))) + x0;
-                    } else {
-                        new_x = (-1 * (radius * Math.abs(x1 - x0)) / (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)))) + x0;
-                    }
-                    if (y1 >= y0) {
-                        new_y = ((radius * Math.abs(y1 - y0)) / (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)))) + y0;
-                    } else {
-                        new_y = (-1 * (radius * Math.abs(y1 - y0)) / (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)))) + y0;
-                    }
-                    Log.d(TAG, "onMapClick: " + Math.sqrt(Math.pow(new_x - x0, 2) + Math.pow(new_y - y0, 2)));
-
-                    overlay.setPosition(new LatLng(new_x, new_y));
-                } else overlay.setPosition(latLng);
+                if (SphericalUtil.computeDistanceBetween(zeroLocation, latLng) > MAX_RADIUS)
+                    overlay.setPosition(SphericalUtil.computeOffset(zeroLocation, MAX_RADIUS, SphericalUtil.computeHeading(zeroLocation, latLng)));
+                else
+                    overlay.setPosition(latLng);
                 mListener.OnSendPosition(overlay.getPosition());
             }
         });
-
-
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(zeroLocation).zoom(17F).build();
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-        mMap.moveCamera(cameraUpdate);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(zeroLocation, 17f));
 
     }
-
-
-    public interface OnPositionFragmentDataListener {
-        void OnSendPosition(LatLng position);
-    }
-
-    private OnPositionFragmentDataListener mListener;
 
     @Override
     public void onAttach(Context context) {
@@ -125,5 +100,9 @@ public class PositionFragment extends Fragment implements OnMapReadyCallback {
         if (context instanceof OnPositionFragmentDataListener) {
             mListener = (OnPositionFragmentDataListener) context;
         }
+    }
+
+    public interface OnPositionFragmentDataListener {
+        void OnSendPosition(LatLng position);
     }
 }

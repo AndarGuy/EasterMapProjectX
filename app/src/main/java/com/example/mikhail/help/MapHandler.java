@@ -15,6 +15,9 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.CustomMarker;
+import com.example.mikhail.help.util.FocusedPlace;
+import com.example.mikhail.help.util.IconRendered;
 import com.example.mikhail.help.util.Place;
 import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.web.RequestListener;
@@ -35,6 +38,8 @@ import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.google.maps.android.SphericalUtil;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,7 +89,8 @@ public class MapHandler implements OnMapReadyCallback {
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Context context;
     private HashMap<String, Place> showingPlaces = new HashMap<>();
-    private Place focusedPlace;
+    private FocusedPlace focusedPlace;
+    private ArrayList<Marker> hidedMarkers;
 
     public MapHandler(Context context) {
         this.context = context;
@@ -141,6 +147,18 @@ public class MapHandler implements OnMapReadyCallback {
 
     private void mapSetup() {
         Log.d(TAG, "mapSetup: setup starting");
+        final ClusterManager<CustomMarker> clusterManager = new ClusterManager<CustomMarker>(context, mMap);
+        clusterManager.setRenderer(new IconRendered(
+                context, mMap, clusterManager));
+        clusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<CustomMarker>() {
+            @Override
+            public boolean onClusterItemClick(CustomMarker customMarker) {
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(customMarker.getPosition()).zoom(11f).build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                mMap.animateCamera(cameraUpdate);
+                return true;
+            }
+        });
         for (int i = 0; i < mThumbIds.length; i++)
             iconByType.put(mThumbTypes[i], Integer.valueOf(mThumbIds[i]));
         mMap.getUiSettings().setRotateGesturesEnabled(false);
@@ -149,14 +167,22 @@ public class MapHandler implements OnMapReadyCallback {
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                clusterManager.cluster();
+            }
+        });
         mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
             public void onCameraMoveStarted(int i) {
-                if (focusedPlace != null) {
-                    focusedPlace.getOverlay().remove();
-                    focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
-                    focusedPlace = null;
-                }
+                unfocusedPlace();
+            }
+        });
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                unfocusedPlace();
             }
         });
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
@@ -184,16 +210,14 @@ public class MapHandler implements OnMapReadyCallback {
                                     currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.dark_gray)));
                                     currentPlace.getMarker().setAnchor(0.5f, 0.5f);
                                     showingPlaces.put(currentPlace.getId(), currentPlace);
+                                    clusterManager.addItem(new CustomMarker(currentPlace.getLocation(), currentPlace.getIcon()));
                                 }
                             }
                             for (String id : ((HashMap<String, Place>) showingPlaces.clone()).keySet()) {
                                 Place place = showingPlaces.get(id);
                                 double x = place.getLatitude(), y = place.getLongitude();
                                 if (!(x < x1 && x > x2 && y > y1 && y < y2)) {
-                                    if (place.equals(focusedPlace)) {
-                                        focusedPlace.getOverlay().remove();
-                                        focusedPlace = null;
-                                    }
+                                    unfocusedPlace();
                                     place.removeMarker();
                                     showingPlaces.remove(id);
                                 }
@@ -213,30 +237,23 @@ public class MapHandler implements OnMapReadyCallback {
             @Override
             public boolean onMarkerClick(final Marker marker) {
                 RetrofitRequest request = new RetrofitRequest(PLACE, INFO);
-                final Place place = showingPlaces.get(marker.getTitle());
+                Place place = showingPlaces.get(marker.getTitle());
 
-                if (focusedPlace != null) {
-                    focusedPlace.getOverlay().remove();
-                    focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
-                    focusedPlace = place;
-                } else {
-                    focusedPlace = place;
-                }
+                unfocusedPlace();
+                focusedPlace = new FocusedPlace(place);
 
-                GroundOverlayOptions overlayOptions = new GroundOverlayOptions().image(BitmapDescriptorFactory.fromBitmap(Utilities.getBitmapFromVectorDrawable(context, R.drawable.place_on_map_loading_bg))).position(place.getLocation(), 0);
-                place.setOverlay(mMap.addGroundOverlay(overlayOptions));
-                //place.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Utilities.tintImage(place.getIcon(), context.getResources().getColor(R.color.white))));
+                GroundOverlayOptions overlayOptions = new GroundOverlayOptions().image(BitmapDescriptorFactory.fromBitmap(Utilities.getBitmapFromVectorDrawable(context, R.drawable.place_on_map_loading_bg))).position(focusedPlace.getLocation(), 0);
+                focusedPlace.setOverlay(mMap.addGroundOverlay(overlayOptions));
                 VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
                 LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
-                placeOpen(Double.valueOf(x1 - x2).floatValue(), place);
+                placeOpen(Double.valueOf(x1 - x2).floatValue(), focusedPlace);
 
                 request.putParam(ID, place.getId());
                 request.setListener(new RequestListener() {
                     @Override
                     public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                         if (result == OK) {
-
                             Bitmap image = Utilities.decodeBase64(response.get(IMAGE));
                             Bitmap crop;
                             if (image.getHeight() > image.getWidth())
@@ -246,8 +263,11 @@ public class MapHandler implements OnMapReadyCallback {
                             Bitmap scaled = Bitmap.createScaledBitmap(crop, 300, 300, true);
                             Bitmap circled = Utilities.getCircledBitmap(scaled);
                             Bitmap circledWithBorders = Utilities.addBorderToRoundedBitmap(circled, 150, 10, Color.WHITE);
-                            place.getOverlay().setImage(BitmapDescriptorFactory.fromBitmap(circledWithBorders));
-                            focusedPlace = place;
+                            try {
+                                focusedPlace.getOverlay().setImage(BitmapDescriptorFactory.fromBitmap(circledWithBorders));
+                            } catch (Exception e) {
+                                unfocusedPlace();
+                            }
                         } else {
                             onFailure(call, new Exception("ERROR: " + result));
                         }
@@ -267,40 +287,61 @@ public class MapHandler implements OnMapReadyCallback {
             mMap.setMyLocationEnabled(true);
     }
 
-    private void placeOpen(final float needDistance, final Place place) {
+    private void unfocusedPlace() {
+        if (focusedPlace != null) {
+            if (focusedPlace.getOverlay() != null)
+                focusedPlace.removeOverlay();
+            focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
+            focusedPlace.showPlaces();
+            focusedPlace = null;
+        }
+    }
+
+    private void placeOpen(final float needDistance, final FocusedPlace focusedPlace) {
+
+        focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
 
         final int startColor = 77;
         final int endAlpha = 100, startAlpha = 255;
-        final int animationTime = 75;
-        final float distancePerTime = needDistance * 30000f / animationTime;
-        final float iconScalePerTime = 1f / animationTime;
-        final float tintColorChangePerTime = (255f - startColor) / animationTime;
-        final float tintAlphaPerTime = (startAlpha - endAlpha) / animationTime;
+        final int delayTimeInMills = 15;
+        final int animationTimes = 20;
+        final float distancePerTime = needDistance * 30000f / animationTimes;
+        final float iconScalePerTime = 1f / animationTimes;
+        final float tintColorChangePerTime = (255f - startColor) / animationTimes;
+        final float tintAlphaPerTime = (startAlpha - endAlpha) / animationTimes;
 
         final Handler myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 int time = msg.what;
-                int iconHeight = place.getIcon().getHeight(), iconWidth = place.getIcon().getWidth();
+                int iconHeight = focusedPlace.getIcon().getHeight(), iconWidth = focusedPlace.getIcon().getWidth();
                 int currentTint = startColor + Float.valueOf(tintColorChangePerTime * time).intValue();
-                place.getOverlay().setDimensions(time * distancePerTime);
-                place.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Utilities.tintImage(Bitmap.createScaledBitmap(place.getIcon(), Float.valueOf(iconHeight + iconScalePerTime * time * iconHeight).intValue(), Float.valueOf(iconWidth + iconScalePerTime * time * iconWidth).intValue(), true), Color.argb(Float.valueOf(startAlpha - tintAlphaPerTime * time).intValue(), currentTint, currentTint, currentTint))));
+                focusedPlace.getOverlay().setDimensions(time * distancePerTime);
+                focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Utilities.tintImage(Bitmap.createScaledBitmap(focusedPlace.getIcon(), Float.valueOf(iconHeight + iconScalePerTime * time * iconHeight).intValue(), Float.valueOf(iconWidth + iconScalePerTime * time * iconWidth).intValue(), true), Color.argb(Float.valueOf(startAlpha - tintAlphaPerTime * time).intValue(), currentTint, currentTint, currentTint))));
+                for (String id : ((HashMap<String, Place>) showingPlaces.clone()).keySet()) {
+                    Place showingPlace = showingPlaces.get(id);
+                    if (focusedPlace.getId() != showingPlace.getId() && SphericalUtil.computeDistanceBetween(focusedPlace.getLocation(), showingPlace.getLocation()) < time * distancePerTime / 2) {
+                        focusedPlace.addHidedPlace(showingPlace);
+                    }
+                }
             }
         };
 
-        new Thread(new Runnable() {
+        Thread thread = (new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 10; i < animationTime; i++) {
+                for (int i = 5; i < animationTimes; i++) {
                     try {
-                        TimeUnit.MILLISECONDS.sleep(4);
+                        TimeUnit.MILLISECONDS.sleep(delayTimeInMills);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     myHandler.sendEmptyMessage(i);
                 }
             }
-        }).start();
+        }));
+
+        thread.start();
 
     }
 

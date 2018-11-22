@@ -4,18 +4,26 @@ import android.graphics.Bitmap;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class Place {
-    private String id, name, description, type;
-    private Bitmap image, icon;
+    private String id, type;
+    private Bitmap icon;
     private LatLng location;
     private Double latitude, longitude;
     private Marker marker;
-    private GroundOverlay overlay;
+
+    public Place(String id, String type, Double latitude, Double longitude, Bitmap icon, Marker marker) {
+        this.id = id;
+        this.type = type;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.location = new LatLng(latitude, longitude);
+        this.icon = icon;
+        this.marker = marker;
+    }
 
     public Place(String id, String type, Double latitude, Double longitude) {
         this.id = id;
@@ -33,14 +41,6 @@ public class Place {
         this.longitude = this.location.longitude;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public void addMarker(GoogleMap googleMap, Bitmap icon) {
         this.marker = googleMap.addMarker(new MarkerOptions().position(location).title(id).icon(BitmapDescriptorFactory.fromBitmap(icon)));
         this.icon = icon;
@@ -48,14 +48,6 @@ public class Place {
 
     public void removeMarker() {
         this.marker.remove();
-    }
-
-    public Bitmap getImage() {
-        return image;
-    }
-
-    public void setImage(Bitmap image) {
-        this.image = image;
     }
 
     public String getType() {
@@ -80,14 +72,6 @@ public class Place {
 
     public LatLng getLocation() {
         return location;
-    }
-
-    public void setOverlay(GroundOverlay overlay) {
-        this.overlay = overlay;
-    }
-
-    public GroundOverlay getOverlay() {
-        return overlay;
     }
 
     public void setIcon(Bitmap icon) {

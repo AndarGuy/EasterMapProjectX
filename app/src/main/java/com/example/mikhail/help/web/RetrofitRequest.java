@@ -66,7 +66,7 @@ public class RetrofitRequest {
                     Integer result = Integer.valueOf(map.get(RESULT));
                     listener.onResponse(call, map, result);
                 } catch (Exception e) {
-                    Log.e(TAG, "onResponse: " + response.body() + " " + gson.toJson(response.body()), e);
+                    Log.e(TAG, "onResponse: " + e.getLocalizedMessage(), e);
                     listener.onFailure(call, e);
                 }
             }
