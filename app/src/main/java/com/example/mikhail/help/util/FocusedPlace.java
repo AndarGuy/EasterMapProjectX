@@ -55,4 +55,12 @@ public class FocusedPlace extends Place {
     public void setOverlay(GroundOverlay overlay) {
         this.overlay = overlay;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }
