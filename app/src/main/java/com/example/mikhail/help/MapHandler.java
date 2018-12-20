@@ -90,14 +90,16 @@ public class MapHandler implements OnMapReadyCallback {
             else moveCameraToLocation(location, currentZoom, ANIMATED_MOVE);
         }
     };
+
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private Context context;
     private HashMap<String, Place> showingPlaces = new HashMap<>();
     private FocusedPlace focusedPlace;
 
-    private boolean isInfoActivityOpen;
+    public static boolean isInfoActivityOpen;
 
     public MapHandler(Context context) {
+        isInfoActivityOpen = false;
         this.context = context;
     }
 
@@ -203,7 +205,6 @@ public class MapHandler implements OnMapReadyCallback {
                                 Place place = showingPlaces.get(id);
                                 double x = place.getLatitude(), y = place.getLongitude();
                                 if (!(x < x1 && x > x2 && y > y1 && y < y2)) {
-                                    unfocusedPlace();
                                     place.removeMarker();
                                     showingPlaces.remove(id);
                                 }
@@ -382,17 +383,21 @@ public class MapHandler implements OnMapReadyCallback {
     }
 
     public void openInfoActivity() {
-        //TODO: Fix twice open info activity bug
+
+        isInfoActivityOpen = true;
+
         Intent intent = new Intent(context, InfoActivity.class);
         intent.putExtra(NAME, focusedPlace.getName());
         intent.putExtra(DESCRIPTION, focusedPlace.getDescription());
         intent.putExtra(IMAGE, Utilities.getStringImage(focusedPlace.getImage()));
-        intent.putExtra(ICON, Utilities.getStringImage(focusedPlace.getIcon()));
+        intent.putExtra(ICON, iconByType.get(focusedPlace.getType()));
         intent.putExtra(LATITUDE, focusedPlace.getLatitude());
         intent.putExtra(LONGITUDE, focusedPlace.getLongitude());
 
         context.startActivity(intent);
     }
+
+
 
     private void moveCameraToPosition(LatLng position, float zoom) {
         CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(zoom).build();
@@ -416,5 +421,4 @@ public class MapHandler implements OnMapReadyCallback {
                 break;
         }
     }
-
 }

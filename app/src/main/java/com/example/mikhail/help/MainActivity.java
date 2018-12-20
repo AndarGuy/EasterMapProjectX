@@ -181,7 +181,12 @@ public class MainActivity extends AppCompatActivity {
         mFindsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         mShopLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         mAccountManageLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        mSettingsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mSettingsLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), SettingsActivity.class));
+            }
+        });
         mBugReportLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         mFab.setOnClickListener(listener.onFabClick());
         mFabPlace.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
@@ -407,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getBaseContext(), AuthorizationActivity.class);
         startActivityForResult(intent, REQUEST_ACCOUNT);
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

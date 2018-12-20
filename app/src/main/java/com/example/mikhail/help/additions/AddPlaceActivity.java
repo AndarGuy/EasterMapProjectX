@@ -3,6 +3,7 @@ package com.example.mikhail.help.additions;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -56,6 +57,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     private LatLng position;
     private String name, description, type;
     private Bitmap image;
+    private boolean showHints;
 
     @Override
     public void OnSendName(String name) {
@@ -87,22 +89,22 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_place);
 
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        showHints = pref.getBoolean("showHint", true);
+
         elementsLoad();
 
-        hint.setText(getResources().getStringArray(R.array.add_place_hints)[0]);
-        hint.animate().setDuration(6000).alpha(0);
+        setHintText(0);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                hint.animate().setDuration(6000).alpha(0);
+                animateHint();
             }
 
             @Override
             public void onPageSelected(int position) {
-                hint.setText(getResources().getStringArray(R.array.add_place_hints)[position]);
-                hint.animate().cancel();
-                hint.setAlpha(1);
+                setHintText(position);
             }
 
             @Override
@@ -121,6 +123,20 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
         setupToolbar();
 
+    }
+
+    private void animateHint() {
+        if (showHints) {
+            hint.animate().setDuration(6000).alpha(0);
+        }
+    }
+
+    private void setHintText(int position) {
+        if (showHints) {
+            hint.setText(getResources().getStringArray(R.array.add_place_hints)[position]);
+            hint.animate().cancel();
+            hint.setAlpha(1);
+        }
     }
 
     private void elementsLoad() {

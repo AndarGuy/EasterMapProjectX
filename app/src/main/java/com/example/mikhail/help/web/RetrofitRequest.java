@@ -18,7 +18,7 @@ public class RetrofitRequest {
     private static final String TAG = "RetrofitRequest";
 
     final String RESULT = "result", EMAIL = "email", PASSWORD = "password";
-    String server = "http://andarguy.me";
+    String server = "http://46.101.128.42";
     String action, nextAction;
     String email, password;
     HashMap<String, String> postDataParams = new HashMap<>();

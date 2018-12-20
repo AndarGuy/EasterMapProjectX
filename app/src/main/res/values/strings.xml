@@ -92,4 +92,7 @@
         <item>Easter egg</item>
     </string-array>
 
+    <string name="show_hints">Show hints</string>
+    <string name="default_is_on">Default is on</string>
+
 </resources>

@@ -1,7 +1,5 @@
 package com.example.mikhail.help;
 
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,11 +7,9 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.mikhail.help.util.IconRendered;
 import com.example.mikhail.help.util.Utilities;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 
 public class InfoActivity extends AppCompatActivity {
 
@@ -38,8 +34,15 @@ public class InfoActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        MapHandler.isInfoActivityOpen = false;
         finish();
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        MapHandler.isInfoActivityOpen = false;
     }
 
     @Override
@@ -58,17 +61,7 @@ public class InfoActivity extends AppCompatActivity {
         name.setText(getIntent().getExtras().getString(NAME));
         description.setText(getIntent().getExtras().getString(DESCRIPTION));
         image.setImageBitmap(Utilities.decodeBase64(getIntent().getExtras().getString(IMAGE)));
-        icon.setImageBitmap(Utilities.decodeBase64(getIntent().getExtras().getString(ICON)));
-
-        try {
-            Geocoder geo = new Geocoder(this.getBaseContext(), Locale.getDefault());
-            List<Address> addresses = geo.getFromLocation(getIntent().getExtras().getDouble(LATITUDE), getIntent().getExtras().getDouble(LONGITUDE), 1);
-            if (!addresses.isEmpty()) {
-                address.setText(addresses.get(0).getFeatureName() + ", " + addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        icon.setImageBitmap(Utilities.getBitmapFromVectorDrawable(this, getIntent().getExtras().getInt(ICON)));
     }
+
 }

@@ -7,4 +7,6 @@
     style="@style/MainToolbar"
     app:titleTextColor="@color/white"
     app:title="@string/map"
-    android:foregroundTint="@color/white" />
+    android:foregroundTint="@color/white">
+
+</android.support.v7.widget.Toolbar>

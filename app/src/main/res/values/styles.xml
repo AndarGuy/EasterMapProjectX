@@ -9,6 +9,12 @@
         <item name="android:textColorSecondary">@color/white</item>
     </style>
 
+    <style name="AppTheme.DarkLight" parent="AppTheme">
+        <item name="android:tint">@color/white</item>
+        <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
+    </style>
+
     <style name="AppTheme.Light" parent="AppTheme">
         <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
         <item name="android:textColorSecondary">@color/textColorDarkSecondary</item>
