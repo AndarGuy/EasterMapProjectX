@@ -80,7 +80,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="5dp"
                     android:src="@drawable/ic_pencil"
-                    android:tint="@color/dark_gray" />
+                    android:tint="@color/DarkGrey" />
             </LinearLayout>
 
             <EditText

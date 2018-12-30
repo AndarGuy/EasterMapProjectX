@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center|top"
             android:layout_marginTop="6dp"
-            android:tint="@color/dark_gray" />
+            android:tint="@color/DarkGrey" />
     </FrameLayout>
 
     <FrameLayout

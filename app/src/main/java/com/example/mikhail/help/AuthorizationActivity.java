@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +26,6 @@ import retrofit2.Call;
 
 public class AuthorizationActivity extends AppCompatActivity {
 
-    public static final String APP_PREFERENCES = "config";
     public final int
             MAX_PASSWORD_LENGTH = 32,
             MIN_PASSWORD_LENGTH = 6;
@@ -151,11 +151,11 @@ public class AuthorizationActivity extends AppCompatActivity {
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 switch (result) {
                     case OK:
-                        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AuthorizationActivity.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString(EMAIL, email);
                         editor.putString(PASSWORD, password);
-                        editor.commit();
+                        editor.apply();
                         setResult(RESULT_OK);
                         finish();
                         break;

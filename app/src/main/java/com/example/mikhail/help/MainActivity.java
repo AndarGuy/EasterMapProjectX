@@ -2,6 +2,7 @@ package com.example.mikhail.help;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.arch.lifecycle.ReportFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.NameHelper;
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
 import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.web.RequestListener;
@@ -52,29 +55,16 @@ import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String APP_PREFERENCES = "config";
     private final String TAG = "MainActivity";
-    private final int ERROR_DIALOG_REQUEST = 9001;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private final String ACTION_TEST = "test";
-    private final String
-            NEW_NAME = "new_name",
-            ACTION_GENERATE = "generate",
-            ACTION_SET = "set",
-            ACTION_GET = "get",
-            NAME = "name",
-            PASSWORD = "password",
-            EMAIL = "email",
-            LOGIN = "login";
-    private final int REQUEST_ACCOUNT = 2, OK = 0;
+    private final int REQUEST_ACCOUNT = 2;
     public boolean mLocationPermissionGranted = false;
-    public boolean userAuthorized = false;
     protected GeoDataClient mGeoDataClient;
+    private final static String NAME = "name";
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
-    private String email, password;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mBarDrawerToggle;
     private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
@@ -101,10 +91,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (isServicesOK()) {
-            getLocationPermission();
-            mapLoad();
-        }
+        getLocationPermission();
+        mapLoad();
 
         //TODO: replace to AsyncTask
         /* new Thread() {
@@ -129,9 +117,9 @@ public class MainActivity extends AppCompatActivity {
 
         toolbarLoad();
 
-        elementsSetListeners();
+        showName(PreferenceManager.getDefaultSharedPreferences(this).getString(NAME, getString(R.string.loading)));
 
-        userAuthorize();
+        elementsSetListeners();
 
     }
 
@@ -173,7 +161,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 showNameLoading();
-                generateName(email, password);
+                NameHelper.generateName(MainActivity.this, new NameHelper.NameListener() {
+                    @Override
+                    public void onReturned(String name) {
+                        showName(name);
+                    }
+
+                    @Override
+                    public void onFailed(Throwable t) {
+                        showName(getResources().getString(R.string.error_occurred));
+                    }
+                });
             }
         });
         mDrawerLayout.addDrawerListener(mBarDrawerToggle);
@@ -188,6 +186,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mBugReportLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mBugReportLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), ReportActivity.class));
+            }
+        });
         mFab.setOnClickListener(listener.onFabClick());
         mFabPlace.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
         mFabEvent.setOnClickListener(listener.onMiniFabClick(this, this, mapHandler));
@@ -369,58 +373,9 @@ public class MainActivity extends AppCompatActivity {
 
     //-------------ACCOUNT-------------
 
-    public boolean isServicesOK() {
-
-        Log.d(TAG, "isServicesOK: checking google services version");
-
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
-
-        if (available == ConnectionResult.SUCCESS) {
-            Log.d(TAG, "isServicesOK: Google Play Services is working");
-            return true;
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
-            Log.d(TAG, "isServicesOK: an error occurred but we can resolve it");
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
-            dialog.show();
-        } else {
-            Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
-        }
-
-        return false;
-    }
-
-    public void userAuthorize() {
-        RetrofitRequest request = new RetrofitRequest(ACTION_TEST);
-        request.setListener(new RequestListener() {
-            @Override
-            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
-                Log.d(TAG, "onResponse: Server online");
-                userLogin();
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Toast.makeText(MainActivity.this, getString(R.string.server_not_online), Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "onFailure: Server connection failed, because " + t.toString());
-                withoutAccount();
-            }
-        });
-        request.makeRequest();
-    }
-
     public void openAuthorizationActivity() {
         Intent intent = new Intent(getBaseContext(), AuthorizationActivity.class);
         startActivityForResult(intent, REQUEST_ACCOUNT);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode);
-        if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_CANCELED) withoutAccount();
-        else if (requestCode == REQUEST_ACCOUNT && resultCode == RESULT_OK)
-            MainActivity.this.recreate();
     }
 
     public void openInternetConnection(Context context) {
@@ -430,13 +385,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void showName(String name) {
         mNameEditLayout.setEnabled(true);
-        String formattedName = "";
+        StringBuilder formattedName = new StringBuilder();
         try {
             for (String s : name.split("_")) {
                 if (s.length() > 1) {
-                    formattedName += String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1);
+                    formattedName.append(String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1));
                 } else {
-                    formattedName += s.toUpperCase();
+                    formattedName.append(s.toUpperCase());
                 }
             }
             mNameView.setText(formattedName);
@@ -451,119 +406,4 @@ public class MainActivity extends AppCompatActivity {
         mNameEditLayout.setEnabled(false);
     }
 
-    private void generateName(final String email, final String password) {
-        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_GENERATE, email, password);
-        request.setListener(new RequestListener() {
-            @Override
-            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
-                if (result == OK) {
-                    Log.d(TAG, "onResponse: generated name: " + response.get(NAME));
-                    showName(response.get(NAME));
-                } else {
-                    openAuthorizationActivity();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Log.d(TAG, "onResponse: nick generation error! error: " + t.toString());
-            }
-        });
-        request.makeRequest();
-    }
-
-    private void setName(final String email, final String password, final String new_name) {
-        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_SET, email, password);
-        request.putParam(NEW_NAME, new_name);
-        request.setListener(new RequestListener() {
-            @Override
-            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
-                if (result == OK) {
-                    if (result == OK) {
-                        Log.d(TAG, "onResponse: nick change to " + new_name);
-                        showName(new_name);
-                    } else {
-                        Log.d(TAG, "onResponse: nick change error! " + result);
-                        openAuthorizationActivity();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Log.d(TAG, "onResponse: nick change error! error: " + t.toString());
-            }
-        });
-        request.makeRequest();
-    }
-
-    private void getName(final String email, final String password) {
-        RetrofitRequest request = new RetrofitRequest(NAME, ACTION_GET, email, password);
-        request.setListener(new RequestListener() {
-            @Override
-            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
-                if (result == OK) {
-
-                    Log.d(TAG, "onResponse: gotten name is " + response.get(NAME));
-                    showName(response.get(NAME));
-                } else {
-                    openAuthorizationActivity();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-                Log.d(TAG, "onFailure: very bad ;( " + t.toString());
-            }
-        });
-        request.makeRequest();
-    }
-
-    //APPEARANCE
-
-    public void userLogin() {
-        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
-        if (preferences.contains(PASSWORD) && preferences.contains(EMAIL)) {
-            email = preferences.getString(EMAIL, null);
-            password = preferences.getString(PASSWORD, null);
-            RetrofitRequest request = new RetrofitRequest(LOGIN, email, password);
-            request.setListener(new RequestListener() {
-                @Override
-                public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
-                    Log.d(TAG, "onResponse: " + result);
-                    if (result != OK) {
-                        openAuthorizationActivity();
-                    } else {
-                        getName(email, password);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Object> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, getString(R.string.something_wrong), Toast.LENGTH_SHORT).show();
-                    withoutAccount();
-                }
-            });
-            request.makeRequest();
-
-        } else {
-            openAuthorizationActivity();
-        }
-    }
-
-    public void withoutAccount() {
-        mFab.setVisibility(View.INVISIBLE);
-        mFabEvent.setVisibility(View.INVISIBLE);
-        mFabPlace.setVisibility(View.INVISIBLE);
-        mFabText.setVisibility(View.INVISIBLE);
-        LinearLayout navigation = findViewById(R.id.navigation_container);
-        navigation.removeAllViewsInLayout();
-        navigation.addView(getLayoutInflater().inflate(R.layout.nav_header_no_user, null));
-        navigation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAuthorizationActivity();
-            }
-        });
-    }
 }

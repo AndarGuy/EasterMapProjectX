@@ -8,11 +8,12 @@
     tools:context=".InternetConnection">
 
     <ImageView
+        android:id="@+id/emojiView"
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:layout_gravity="center"
         android:layout_marginTop="64dp"
-        app:srcCompat="@drawable/ic_angry" />
+        app:srcCompat="@drawable/ic_alien" />
 
     <TextView
         android:layout_width="match_parent"
@@ -24,12 +25,11 @@
 
     <ImageView
         android:id="@+id/retryButton"
-        style="@style/Button.Flat"
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_sync"
+        android:src="@drawable/ic_sync"
         android:tint="@color/textColorDarkPrimary" />
 
     <TextView

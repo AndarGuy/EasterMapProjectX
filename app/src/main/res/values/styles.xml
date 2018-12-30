@@ -9,6 +9,14 @@
         <item name="android:textColorSecondary">@color/white</item>
     </style>
 
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/background_splash</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowEnterAnimation">@android:anim/cycle_interpolator</item>
+    </style>
+
     <style name="AppTheme.DarkLight" parent="AppTheme">
         <item name="android:tint">@color/white</item>
         <item name="android:textColorPrimary">@color/textColorDarkPrimary</item>
@@ -58,6 +66,13 @@
 
     <style name="Text" />
 
+    <style name="Text.Before">
+        <item name="android:textColor">@color/DarkGrey</item>
+    </style>
+    <style name="Text.After">
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
     <style name="Text.Items">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/grey3E</item>
@@ -99,7 +114,7 @@
     </style>
 
     <style name="Text.NameTitle.Dark" parent="Text.NameTitle">
-        <item name="android:textColor">@color/dark_gray</item>
+        <item name="android:textColor">@color/DarkGrey</item>
     </style>
 
     <style name="Text.LightTitle" parent="Text">

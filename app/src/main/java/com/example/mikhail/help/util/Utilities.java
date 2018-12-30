@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 
-public class Utilities {
+public final class Utilities {
 
     private static final String TAG = "Utilities";
 

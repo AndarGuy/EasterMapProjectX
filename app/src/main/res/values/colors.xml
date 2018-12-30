@@ -15,6 +15,7 @@
     <color name="grayBD">#BDBDBD</color>
     <color name="black50p">#80000000</color>
     <color name="white70p">#B3FFFFFF</color>
-    <color name="dark_gray">#4d4d4d</color>
+    <color name="DarkGrey">#4d4d4d</color>
     <color name="unknown">#899E9C</color>
+    <color name="blueBG">#274478</color>
 </resources>

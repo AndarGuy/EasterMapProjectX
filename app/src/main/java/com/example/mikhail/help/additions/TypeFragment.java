@@ -3,11 +3,8 @@ package com.example.mikhail.help.additions;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,10 +64,10 @@ public class TypeFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
             if (mSelectImage != null) {
-                mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.dark_gray)));
+                mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.DarkGrey)));
             }
             if (mSelectText != null) {
-                mSelectText.setTextColor(getResources().getColor(R.color.dark_gray));
+                mSelectText.setTextColor(getResources().getColor(R.color.DarkGrey));
             }
             mSelectText = v.findViewById(R.id.text);
             mSelectImage = v.findViewById(R.id.image);

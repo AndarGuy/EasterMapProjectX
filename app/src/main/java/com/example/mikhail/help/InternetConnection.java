@@ -13,14 +13,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.mikhail.help.util.Utilities;
+import com.example.mikhail.help.web.RequestListener;
+import com.example.mikhail.help.web.RetrofitRequest;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
 
 public class InternetConnection extends AppCompatActivity {
 
     private static final String TAG = "InternetConnection";
 
-    Utilities utils = new Utilities();
+    private static final String TEST = "test";
 
-    ImageView retry;
+    ImageView retry, emoji;
     TextView info;
 
     @Override
@@ -30,18 +36,30 @@ public class InternetConnection extends AppCompatActivity {
 
         retry = findViewById(R.id.retryButton);
         info = findViewById(R.id.info);
+        emoji = findViewById(R.id.emojiView);
 
         retry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isNetworkConnected(InternetConnection.this)) {
-                    utils.setColoredText(info, getResources().getString(R.string.success), Color.LTGRAY);
-                    Intent intent = new Intent(InternetConnection.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    utils.setColoredText(info, getResources().getString(R.string.no_connection), Color.LTGRAY);
-                }
+                RetrofitRequest request = new RetrofitRequest(TEST);
+                retry.setEnabled(false);
+                request.setListener(new RequestListener() {
+                    @Override
+                    public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                        emoji.setImageResource(R.drawable.ic_shocked);
+                        Utilities.setColoredText(info, getResources().getString(R.string.success), Color.LTGRAY);
+                        Intent intent = new Intent(InternetConnection.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Object> call, Throwable t) {
+                        retry.setEnabled(true);
+                        Utilities.setColoredText(info, getResources().getString(R.string.no_connection), Color.LTGRAY);
+                    }
+                });
+                request.makeRequest();
             }
         });
 
@@ -53,7 +71,8 @@ public class InternetConnection extends AppCompatActivity {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = null;
+        if (connectivityManager != null) networkInfo = connectivityManager.getActiveNetworkInfo();
 
         Log.d(TAG, "isNetworkConnected: Internet enable: " + (networkInfo != null && networkInfo.isConnected()));
 

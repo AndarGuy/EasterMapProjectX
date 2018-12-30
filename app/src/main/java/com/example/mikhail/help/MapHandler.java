@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
@@ -193,7 +192,7 @@ public class MapHandler implements OnMapReadyCallback {
                                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
                                 Double needDistance = (x1 - x2) * 30000f;
                                 if (!showingPlaces.keySet().contains(currentPlace.getId()) && Arrays.asList(mThumbTypes).contains(currentPlace.getType())) {
-                                    currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.dark_gray)));
+                                    currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.DarkGrey)));
                                     currentPlace.getMarker().setAnchor(0.5f, 0.5f);
                                     if (focusedPlace != null && SphericalUtil.computeDistanceBetween(focusedPlace.getLocation(), currentPlace.getLocation()) < needDistance)
                                         focusedPlace.addHidedPlace(currentPlace);
