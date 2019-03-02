@@ -55,7 +55,6 @@ public class InfoActivity extends AppCompatActivity {
         name = findViewById(R.id.nameText);
         description = findViewById(R.id.descriptionText);
         image = findViewById(R.id.myImage);
-        address = findViewById(R.id.addressText);
         icon = findViewById(R.id.iconImage);
 
         name.setText(getIntent().getExtras().getString(NAME));

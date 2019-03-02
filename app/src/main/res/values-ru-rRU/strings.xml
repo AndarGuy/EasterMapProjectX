@@ -124,5 +124,8 @@
     <string name="continue_with_account">Войти в аккаунт</string>
     <string name="try_it">Попробуй сейчас!</string>
     <string name="i_hope_you_remember_your_password">Надеюсь вы запомнили свой пароль!</string>
+    <string name="kilometers">километров</string>
+    <string name="send_a_comment">Отправить комментарий</string>
+    <string name="send">Отправить</string>
 
 </resources>

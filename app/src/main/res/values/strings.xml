@@ -44,6 +44,7 @@
 
     <string name="add_event">Add event</string>
     <string name="meters">meters</string>
+    <string name="kilometers">kilometers</string>
 
     <string-array name="add_event_hints">
         <item>Select the exact location</item>
@@ -125,5 +126,7 @@
     <string name="continue_with_account">Continue</string>
     <string name="try_it">Try it</string>
     <string name="i_hope_you_remember_your_password">I hope you remember your password!</string>
+    <string name="send_a_comment">Send a comment</string>
+    <string name="send">Send</string>
 
 </resources>

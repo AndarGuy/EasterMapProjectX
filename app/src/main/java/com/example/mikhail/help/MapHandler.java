@@ -84,7 +84,7 @@ public class MapHandler implements OnMapReadyCallback {
             R.drawable.ic_egg_easter};
     private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
     private final HashMap<String, Integer> iconByType = new HashMap<>();
-    public Location location;
+    public static Location location;
     private GoogleMap mMap;
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override

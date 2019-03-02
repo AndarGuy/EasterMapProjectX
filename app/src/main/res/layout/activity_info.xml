@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainDataLayout"
@@ -7,70 +8,105 @@
     android:orientation="vertical"
     tools:context=".InfoActivity">
 
-    <include layout="@layout/app_bar_main" />
-
-
-    <ImageView
-        android:id="@+id/myImage"
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:adjustViewBounds="true"
-        android:background="@color/darkGrey"
-        android:elevation="6dp"
-        android:scaleType="centerCrop" />
-
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
-        <ImageView
-            android:id="@+id/iconImage"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_church"
-            android:tint="@color/darkGrey" />
-
-        <TextView
-            android:id="@+id/nameText"
-            style="@style/Text.NameTitle.Dark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/name_of_place"
-            android:textAllCaps="true" />
-
-    </LinearLayout>
+    <include layout="@layout/app_bar_main" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="16dp">
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/descriptionText"
+            <ImageView
+                android:id="@+id/myImage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:textColor="@color/grey3E" />
+                android:layout_height="180dp"
+                android:adjustViewBounds="true"
+                android:background="@color/darkGrey"
+                android:contentDescription="@string/add_photo"
+                android:elevation="6dp"
+                android:scaleType="centerCrop" />
 
-            <TextView
-                android:id="@+id/addressText"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iconImage"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_church"
+                    android:tint="@color/darkGrey" />
+
+                <TextView
+                    android:id="@+id/nameText"
+                    style="@style/Text.NameTitle.Dark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/name_of_place"
+                    android:textAllCaps="true" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/roboto"
-                android:textColor="@color/grayBD" />
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/descriptionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="@color/grey3E" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/lightGrey" />
+
+                <include
+                    layout="@layout/send_comment_sample"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:id="@+id/commentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/comment_sample" />
+
+                    <include layout="@layout/comment_sample" />
+
+                    <include layout="@layout/comment_sample" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+
         </LinearLayout>
-
     </ScrollView>
-
 </LinearLayout>

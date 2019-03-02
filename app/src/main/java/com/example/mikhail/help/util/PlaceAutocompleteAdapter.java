@@ -2,6 +2,7 @@ package com.example.mikhail.help.util;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -14,12 +15,14 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.mikhail.help.MapHandler;
 import com.example.mikhail.help.R;
 import com.example.mikhail.help.web.Answer;
 import com.example.mikhail.help.web.RetrofitRequest;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.gson.Gson;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +45,6 @@ public class PlaceAutocompleteAdapter extends BaseAdapter implements Filterable 
     private List<Place> mResults;
     private Context mContext;
 
-    private LatLngBounds mBounds;
-
     public PlaceAutocompleteAdapter(Context context) {
         mContext = context;
         mResults = new ArrayList<Place>();
@@ -57,10 +58,6 @@ public class PlaceAutocompleteAdapter extends BaseAdapter implements Filterable 
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    public void setBounds(LatLngBounds bounds) {
-        mBounds = bounds;
     }
 
     @Override
@@ -78,15 +75,33 @@ public class PlaceAutocompleteAdapter extends BaseAdapter implements Filterable 
 
         Place place = getItem(position);
 
+        Location placeLocation = new Location(place.getId());
+        placeLocation.setLatitude(place.getLatitude());
+        placeLocation.setLongitude(place.getLongitude());
+
+        Location myLocation = MapHandler.location;
+
         TextView textView1 = convertView.findViewById(R.id.text1);
         TextView textView2 = convertView.findViewById(R.id.text2);
         ImageView imageView1 = convertView.findViewById(R.id.image1);
         textView1.setTextColor(mContext.getResources().getColor(R.color.darkGrey));
         textView2.setTextColor(mContext.getResources().getColor(R.color.darkGrey));
-        Log.d(TAG, "getView: " + place.getIcon());
         imageView1.setImageBitmap(place.getIcon());
         textView1.setText(place.getName());
-        textView2.setText(place.getType());
+        Log.d(TAG, "getView: " + myLocation + " " + placeLocation);
+
+        if (myLocation == null) {
+            textView2.setText(place.getId());
+        } else {
+            float distance = placeLocation.distanceTo(myLocation);
+            if (distance < 1000) {
+                textView2.setText(String.format("%s %s", Math.round(distance), mContext.getString(R.string.meters)));
+            } else {
+                distance /= 1000;
+                distance = BigDecimal.valueOf(distance).setScale(1, RoundingMode.UP).floatValue();
+                textView2.setText(String.format("%s %s", distance, mContext.getString(R.string.kilometers)));
+            }
+        }
 
         return convertView;
     }

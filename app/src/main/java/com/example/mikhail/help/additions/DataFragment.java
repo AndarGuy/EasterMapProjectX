@@ -180,7 +180,7 @@ public class DataFragment extends Fragment {
 
     private void updateEditors() {
         if (viewSwitcher.getCurrentView() instanceof EditText) {
-            if (nameEdit.getText().length() >= NAME_MAX_LENGTH || nameEdit.getText().length() <= NAME_MIN_LENGTH) {
+            if (nameEdit.getText().length() > NAME_MAX_LENGTH || nameEdit.getText().length() < NAME_MIN_LENGTH) {
                 Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
             } else {
                 nameString = nameEdit.getText().toString();
