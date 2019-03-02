@@ -2,6 +2,7 @@ package com.example.mikhail.help;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -14,8 +15,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.mikhail.help.util.NameHelper;
 import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
@@ -43,22 +46,33 @@ public class AuthorizationActivity extends AppCompatActivity {
             PASSWORD = "password",
             EMAIL = "email",
             LOGIN = "login",
-            REGISTER = "register";
-    private Button registerButton, loginButton;
-    private AutoCompleteTextView emailView, passwordView;
-    private TextView emailInfo, passwordInfo;
+            REGISTER = "register",
+            NAME = "name";
+    private Button changeTypeButton, enterButton;
+    private AutoCompleteTextView emailView, passwordView, repeatPassword;
+    private TextView emailInfo, passwordInfo, title;
+
+    private LinearLayout passwordRepLayout;
+
+    private String state = LOGIN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authorization);
 
-        loginButton = findViewById(R.id.enterButton);
-        registerButton = findViewById(R.id.registerButton);
+        enterButton = findViewById(R.id.enterButton);
+        changeTypeButton = findViewById(R.id.changeTypeButton);
         emailView = findViewById(R.id.nicknameInput);
         passwordView = findViewById(R.id.passwordInput);
         emailInfo = findViewById(R.id.nicknameInfo);
         passwordInfo = findViewById(R.id.passwordInfo);
+
+        passwordRepLayout = findViewById(R.id.passwordRepLayout);
+
+        title = findViewById(R.id.title);
+
+        repeatPassword = findViewById(R.id.passwordRepInput);
 
         emailView.setOnEditorActionListener(null);
 
@@ -73,28 +87,67 @@ public class AuthorizationActivity extends AppCompatActivity {
             }
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        enterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String email = emailView.getText().toString();
                 String password = passwordView.getText().toString();
-                if (checkData(email, password)) makeRequest(LOGIN, email, password);
+                final String passwordRep = repeatPassword.getText().toString();
+
+                if (state.equals(LOGIN)) {
+                    if (checkData(email, password)) makeRequest(LOGIN, email, password);
+                } else {
+
+                    AuthorizationActivity.this.setTheme(R.style.AppTheme_Light);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AuthorizationActivity.this);
+                    builder.setTitle(getResources().getString(R.string.warning) + "!")
+                            .setMessage(getResources().getString(R.string.no_provide))
+                            .setCancelable(true)
+                            .setPositiveButton(R.string.scontinue,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+
+                                            String email = emailView.getText().toString();
+                                            String password = passwordView.getText().toString();
+                                            if (checkData(email, password))
+                                                if (password.equals(passwordRep))
+                                                    makeRequest(REGISTER, email, password);
+                                                else passwordInfo.setText(R.string.passwords_different);
+
+                                        }
+                                    }).setNegativeButton(R.string.cancel, null);
+
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+
+                }
             }
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
+        changeTypeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = emailView.getText().toString();
-                String password = passwordView.getText().toString();
-                if (checkData(email, password)) makeRequest(REGISTER, email, password);
+
+                if (state.equals(REGISTER)) {
+                    state = LOGIN;
+                    title.setText(R.string.sign_in);
+                    changeTypeButton.setText(R.string.register);
+                    passwordRepLayout.setAlpha(0);
+                } else {
+                    state = REGISTER;
+                    title.setText(R.string.register);
+                    changeTypeButton.setText(R.string.sign_in);
+                    passwordRepLayout.setAlpha(1);
+                }
+
             }
         });
     }
 
     private boolean checkData(String email, String password) {
 
-        switch (isEmailCorrect(email)) {
+        switch (Utilities.isEmailCorrect(email)) {
             case OK:
                 emailView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 emailInfo.setText("");
@@ -107,7 +160,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                 return false;
         }
 
-        switch (isPasswordCorrect(password)) {
+        switch (Utilities.isPasswordCorrect(password)) {
             case OK:
                 passwordView.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 passwordInfo.setText("");
@@ -128,22 +181,6 @@ public class AuthorizationActivity extends AppCompatActivity {
         info.setText(message);
     }
 
-    private int isEmailCorrect(String email) {
-        if (!Utilities.isValidEmail(email)) {
-            return INVALID_EMAIL;
-        } else {
-            return OK;
-        }
-    }
-
-    private int isPasswordCorrect(String password) {
-        if (password.length() > MAX_PASSWORD_LENGTH || password.length() < MIN_PASSWORD_LENGTH) {
-            return LENGTH_ERROR;
-        } else {
-            return OK;
-        }
-    }
-
     private void makeRequest(final String action, final String email, final String password) {
         RetrofitRequest request = new RetrofitRequest(action, email, password);
         request.setListener(new RequestListener() {
@@ -151,12 +188,24 @@ public class AuthorizationActivity extends AppCompatActivity {
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 switch (result) {
                     case OK:
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AuthorizationActivity.this);
+                        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AuthorizationActivity.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString(EMAIL, email);
                         editor.putString(PASSWORD, password);
                         editor.apply();
                         setResult(RESULT_OK);
+                        NameHelper.getName(AuthorizationActivity.this, new NameHelper.NameListener() {
+                            @Override
+                            public void onReturned(String name) {
+                                preferences.edit().putString(NAME, name).apply();
+                            }
+
+                            @Override
+                            public void onFailed(Throwable t) {
+
+                            }
+                        });
+                        startActivity(new Intent(AuthorizationActivity.this, MainActivity.class));
                         finish();
                         break;
                     case WRONG_EMAIL:
@@ -187,26 +236,7 @@ public class AuthorizationActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        Context context = this;
-        context.setTheme(R.style.AppTheme_Light);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(getResources().getString(R.string.warning) + "!")
-                .setMessage(getResources().getString(R.string.no_sign_in_continue))
-                .setCancelable(true)
-                .setNegativeButton(getResources().getString(R.string.scontinue),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                setResult(RESULT_CANCELED);
-                                finish();
-                            }
-                        });
-
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
+        //do nothing
     }
 
 

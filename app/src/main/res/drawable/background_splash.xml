@@ -7,7 +7,9 @@
         android:drawable="@color/white"/>
 
     <item>
-        <bitmap android:src="@mipmap/ic_launcher"/>
+        <bitmap android:src="@mipmap/ic_launcher"
+            android:tileMode="disabled"
+            android:gravity="center" />
     </item>
 
 </layer-list>

@@ -56,6 +56,9 @@
             android:name=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".AccountSettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -63,6 +66,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".tutorial.TutorialActivity"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

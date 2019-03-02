@@ -19,7 +19,7 @@
         android:layout_margin="16dp"
         android:fontFamily="@font/roboto_medium"
         android:text="300 meters"
-        android:textColor="@color/DarkGrey"
+        android:textColor="@color/darkGrey"
         android:layout_gravity="bottom|end"
         android:textSize="14dp" />
 

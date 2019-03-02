@@ -3,11 +3,6 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
-        <entry key="imageWizard">
-          <value>
-            <PersistentState />
-          </value>
-        </entry>
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -19,8 +14,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_alien" />
-                            <entry key="sourceFile" value="$USER_HOME$/Downloads/alien.svg" />
+                            <entry key="outputName" value="ic_tap" />
+                            <entry key="sourceFile" value="$USER_HOME$/Downloads/tap.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -1,0 +1,128 @@
+<resources>
+    <string name="app_name">Имя приложения</string>
+    <string name="open">Открыть</string>
+    <string name="close">Закрыть</string>
+    <string name="loading">Загрузка…</string>
+    <string name="press_to_edit">Нажмите для генерации</string>
+    <string name="map">Карта</string>
+    <string name="my_finds">Мои находки</string>
+    <string name="shop">Магазин</string>
+    <string name="account_manage">Управление аккаунтом</string>
+    <string name="settings">Настройки</string>
+    <string name="bug_report">Сообщить об ошибке</string>
+    <string name="pen">Карандаш</string>
+    <string name="star">Звезда</string>
+    <string name="account">Аккаунт</string>
+    <string name="bug">Ошибка</string>
+    <string name="something_wrong">Ой! Что-то сломалось!</string>
+    <string name="search">Поиск</string>
+
+    <string name="user_name">Логин</string>
+    <string name="name">Имя</string>
+    <string name="password">Пароль</string>
+    <string name="register">Регистрация</string>
+    <string name="enter">Войти</string>
+    <string name="nickname">Имя пользователя</string>
+    <string name="sign_in">Вход</string>
+    <string name="warning">Предупреждение</string>
+    <string name="no_sign_in_continue">Если Вы продолжите без регистрации, Вы не сможете пользоваться некоторыми функциями приложения</string>
+    <string name="no_provide">Регистрируясь, вы подтверждаете, что автор не несет ответственности за Ваши данные</string>
+    <string name="scontinue">Продолжить</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="place">Место</string>
+    <string name="event">Событие</string>
+    <string name="text">Текст</string>
+    <string name="add_place">Добавить место</string>
+    <string name="position">Позиция</string>
+    <string name="type">Тип</string>
+    <string name="size">Размер</string>
+    <string name="data">Информация</string>
+    <string name="next">Далее</string>
+    <string name="back">Назад</string>
+    <string name="nothing_found">Ничего не найдено</string>
+
+    <string name="add_event">Добавить событие</string>
+    <string name="meters">метров</string>
+
+    <string-array name="add_event_hints">
+        <item>Выбирете, нажав на темную зону, точное местоположение вашей локации</item>
+        <item>Двигайте палец, чтобы изменить размер события</item>
+        <item>Заполните информацию о добавляемой локации</item>
+    </string-array>
+
+    <string name="add_photo">Добавьте фото</string>
+    <string name="press_to_take_photo">Нажмите для этого на картинку</string>
+    <string name="name_of_place">Добавьте заголовок</string>
+    <string name="place_added">Место успешно создано!</string>
+    <string name="place_adding_error">Место не создано!</string>
+    <string name="description">Добавьте описание</string>
+    <string name="tags">Теги</string>
+    <string name="need_from_to_symbols">Длина должна быть от %from% до %to% символов!</string>
+    <string name="invalid_email">Неправильный формат почтового ящика!</string>
+    <string name="wrong_email">Пользователь не зарегистрирован!</string>
+    <string name="wrong_password">Неверный пароль!</string>
+    <string name="sql_error">Ошибка базы данных</string>
+    <string name="already_registered">Пользователь с таким почтовым адресом уже зарегистрирован!</string>
+    <string name="unknown_error">Ошибка %num%</string>
+    <string name="server_not_online">Не удалось подключиться к серверу</string>
+
+    <string name="send_report">Отправить</string>
+    <string name="title_of_problem">Заголовок проблемы</string>
+    <string name="tell_us_bug">Пожалуйста, расскажите об ошибке</string>
+    <string name="thank_for_feedback">Спасибо!</string>
+    <string name="its_very_important_for_us">Это очень важно для нас</string>
+    <string name="error_occurred">Случилась ошибка! Помоему, делать приложения - это не мое!</string>
+
+    <string-array name="add_place_hints">
+        <item>Выбирете, нажав на темную зону, точное местоположение вашей локации</item>
+        <item>Выбирите тип добавляемового места</item>
+        <item>Заполните информацию о добавляемой локации</item>
+    </string-array>
+
+
+    <string name="no_internet_connection">Соединение с сервером или интернетом отсутствует!</string>
+    <string name="wait">Подождите</string>
+    <string name="success">Подключено</string>
+    <string name="no_connection">Нет соединения</string>
+    <string name="can_not_get_position">Не получается Вас найти</string>
+
+    <string name="title_activity_internet_connection">InternetConnection</string>
+    <string name="email">Email</string>
+
+    <string-array name="types_places">
+        <item>Граффити</item>
+        <item>Памятник</item>
+        <item>Место съемки фильма</item>
+        <item>Вид</item>
+        <item>Церковь</item>
+        <item>Памятное здание</item>
+        <item>Пасхалка</item>
+    </string-array>
+
+    <string name="show_hints">Показывать подсказки</string>
+    <string name="default_is_on">По умолчанию включено</string>
+
+    <string name="change_email">Изменить адрес почты</string>
+    <string name="change_password">Изменить пароль</string>
+    <string name="current_password">Текущий пароль</string>
+    <string name="new_email">Новый адрес</string>
+    <string name="log_out">Выйти</string>
+    <string name="important">Важно!</string>
+    <string name="do_you_want_to_log_out">Вы, действительно, хотите выйти?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="repeat_new_password">Повторите пароль</string>
+    <string name="passwords_different">Пароли не совпадают!</string>
+    <string name="move_finger_to_continue">проведите пальцем для продолжения</string>
+    <string name="welcome">Добро пожаловать!</string>
+    <string name="find_interesting_places">Находи интересные места!</string>
+    <string name="be_a_part_of_event">Будь частью событий!</string>
+    <string name="have_a_friend">Заведи друзей!</string>
+    <string name="or">или</string>
+    <string name="continue_with_account">Войти в аккаунт</string>
+    <string name="try_it">Попробуй сейчас!</string>
+    <string name="i_hope_you_remember_your_password">Надеюсь вы запомнили свой пароль!</string>
+
+</resources>

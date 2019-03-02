@@ -1,16 +1,14 @@
 package com.example.mikhail.help;
 
-import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.ContextThemeWrapper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,9 +27,12 @@ public class ReportActivity extends AppCompatActivity {
     TextView textView;
     ProgressBar loading;
 
-    String REPORT = "report",
+    private final static String
+            PASSWORD = "password",
+            EMAIL = "email",
+            REPORT = "report",
             BUG = "bug",
-    TEXT = "text";
+            TEXT = "text";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,8 @@ public class ReportActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int msgLen = reportBugTextLayout.getEditText().getText().length();
                 if (msgLen <= reportBugTextLayout.getCounterMaxLength()) {
-                    final RetrofitRequest request = new RetrofitRequest(BUG, REPORT);
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ReportActivity.this);
+                    final RetrofitRequest request = new RetrofitRequest(BUG, REPORT, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
                     request.putParam(TEXT, reportBugTextLayout.getEditText().getText().toString());
                     sendButton.setEnabled(false);
                     loading.setVisibility(View.VISIBLE);
@@ -58,6 +60,7 @@ public class ReportActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), getString(R.string.thank_for_feedback), Toast.LENGTH_SHORT).show();
                             sendButton.setEnabled(true);
                             loading.setVisibility(View.INVISIBLE);
+                            finish();
                         }
 
                         @Override

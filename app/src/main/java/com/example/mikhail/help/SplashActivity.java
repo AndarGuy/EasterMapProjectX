@@ -6,17 +6,20 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.mikhail.help.tutorial.TutorialActivity;
 import com.example.mikhail.help.util.NameHelper;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.util.SharedPreferencesUtils;
 
 import java.util.HashMap;
 
@@ -31,10 +34,19 @@ public class SplashActivity extends AppCompatActivity {
     LOGIN = "login";
     private final int ERROR_DIALOG_REQUEST = 9001, OK = 0;
     private final String ACTION_TEST = "test";
+    private static final String IS_FIRST_RUNNING = "ISFIRSTRUNNING";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (preferences.getBoolean(IS_FIRST_RUNNING, true)) {
+            startActivity(new Intent(this, TutorialActivity.class));
+            finish();
+            return;
+        }
 
         if (!isServicesOK()) startErrorConnectionActivity();
         checkConnection();

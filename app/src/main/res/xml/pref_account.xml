@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.example.mikhail.help.dialogs.EmailChangeDialog
+        android:key="email"
+        android:title="@string/change_email"
+        android:summary="@string/email" />
+    <com.example.mikhail.help.dialogs.PasswordChangeDialog
+        android:key="password"
+        android:title="@string/change_password"
+        android:summary="*******" />
+    <Preference
+        android:key="logout"
+        android:title="@string/log_out"
+        android:summary="@string/i_hope_you_remember_your_password"/>
+
+</PreferenceScreen>

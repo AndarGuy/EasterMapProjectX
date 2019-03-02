@@ -64,10 +64,10 @@ public class TypeFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
             if (mSelectImage != null) {
-                mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.DarkGrey)));
+                mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.darkGrey)));
             }
             if (mSelectText != null) {
-                mSelectText.setTextColor(getResources().getColor(R.color.DarkGrey));
+                mSelectText.setTextColor(getResources().getColor(R.color.darkGrey));
             }
             mSelectText = v.findViewById(R.id.text);
             mSelectImage = v.findViewById(R.id.image);

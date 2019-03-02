@@ -10,8 +10,8 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +24,7 @@ import android.widget.ViewSwitcher;
 
 import com.example.mikhail.help.R;
 import com.example.mikhail.help.util.Utilities;
+import com.rw.keyboardlistener.KeyboardUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class DataFragment extends Fragment {
     byte nameMaxLength, nameMinLength;
     ImageView mImageView;
     String mCurrentPhotoPath;
-    EditText description;
+    EditText description, nameEdit;
     TextView name;
     ViewSwitcher viewSwitcher;
     String nameString;
@@ -121,7 +122,9 @@ public class DataFragment extends Fragment {
     private void elementsLoad(View v) {
         mImageView = v.findViewById(R.id.myImage);
         description = v.findViewById(R.id.descriptionInput);
+        description.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         name = v.findViewById(R.id.nameText);
+        nameEdit = v.findViewById(R.id.nameTextEdit);
         viewSwitcher = v.findViewById(R.id.viewSwitcher);
     }
 
@@ -141,11 +144,11 @@ public class DataFragment extends Fragment {
             }
         });
 
-        description.setOnKeyListener(new View.OnKeyListener() {
+        KeyboardUtils.addKeyboardToggleListener(getActivity(), new KeyboardUtils.SoftKeyboardToggleListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                mListener.OnSendDescription(description.getText().toString());
-                return false;
+            public void onToggleSoftKeyboard(boolean b) {
+                Log.d(TAG, "onToggleSoftKeyboard: eseges");
+                if (!b) updateEditors();
             }
         });
 
@@ -164,15 +167,7 @@ public class DataFragment extends Fragment {
                         @Override
                         public void onFocusChange(View view, boolean b) {
                             if (!b) {
-                                if (((EditText) element).getText().length() >= NAME_MAX_LENGTH || ((EditText) element).getText().length() <= NAME_MIN_LENGTH) {
-                                    Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
-                                } else {
-                                    name.setText(((EditText) element).getText().toString());
-                                    nameString = ((EditText) element).getText().toString();
-                                    mListener.OnSendName(nameString);
-                                }
-                                viewSwitcher.setClickable(true);
-                                viewSwitcher.showNext();
+                                updateEditors();
                             }
                         }
                     });
@@ -181,6 +176,21 @@ public class DataFragment extends Fragment {
             }
         });
         return v;
+    }
+
+    private void updateEditors() {
+        if (viewSwitcher.getCurrentView() instanceof EditText) {
+            if (nameEdit.getText().length() >= NAME_MAX_LENGTH || nameEdit.getText().length() <= NAME_MIN_LENGTH) {
+                Toast.makeText(getContext(), getResources().getString(R.string.need_from_to_symbols).replace("%name%", getResources().getString(R.string.name)).replace("%from%", String.valueOf(NAME_MIN_LENGTH)).replace("%to%", String.valueOf(NAME_MAX_LENGTH)), Toast.LENGTH_SHORT).show();
+            } else {
+                nameString = nameEdit.getText().toString();
+                name.setText(nameString);
+                mListener.OnSendName(nameString);
+            }
+            viewSwitcher.setClickable(true);
+            viewSwitcher.showNext();
+        }
+        mListener.OnSendDescription(description.getText().toString());
     }
 
     @Override

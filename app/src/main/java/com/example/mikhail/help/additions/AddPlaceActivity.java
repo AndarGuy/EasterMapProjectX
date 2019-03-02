@@ -1,7 +1,10 @@
 package com.example.mikhail.help.additions;
 
+import android.accessibilityservice.AccessibilityService;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.KeyboardView;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
@@ -24,6 +27,7 @@ import com.example.mikhail.help.util.ViewPagerAdapter;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.maps.model.LatLng;
+import com.rw.keyboardlistener.KeyboardUtils;
 
 import java.util.HashMap;
 
@@ -89,17 +93,19 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_place);
 
+        elementsLoad();
+
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         showHints = pref.getBoolean("showHint", true);
-
-        elementsLoad();
+        if (showHints) hint.setVisibility(View.VISIBLE);
+        else hint.setVisibility(View.INVISIBLE);
 
         setHintText(0);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                animateHint();
+
             }
 
             @Override
@@ -125,17 +131,9 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
     }
 
-    private void animateHint() {
-        if (showHints) {
-            hint.animate().setDuration(6000).alpha(0);
-        }
-    }
-
     private void setHintText(int position) {
         if (showHints) {
             hint.setText(getResources().getStringArray(R.array.add_place_hints)[position]);
-            hint.animate().cancel();
-            hint.setAlpha(1);
         }
     }
 
@@ -159,6 +157,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
             }
         }).start();
     }
+
 
     private void elementsSetListeners() {
 
@@ -185,8 +184,8 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                     else if (name == null) shakeView(findViewById(R.id.nameTextLayout));
                     else if (description == null) shakeView(findViewById(R.id.descriptionInput));
                     else {
-                        SharedPreferences preferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
-                        RetrofitRequest request = new RetrofitRequest(PLACE, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AddPlaceActivity.this);
+                        final RetrofitRequest request = new RetrofitRequest(PLACE, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
                         request.putParam(NAME, name);
                         request.putParam(DESCRIPTION, description);
                         request.putParam(TYPE, type);

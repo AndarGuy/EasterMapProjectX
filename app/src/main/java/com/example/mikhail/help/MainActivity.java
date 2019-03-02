@@ -1,11 +1,9 @@
 package com.example.mikhail.help;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.arch.lifecycle.ReportFragment;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -36,22 +34,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.mikhail.help.util.FocusedPlace;
 import com.example.mikhail.help.util.NameHelper;
+import com.example.mikhail.help.util.MapAutocompleteAdapter;
+import com.example.mikhail.help.util.Place;
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
 import com.example.mikhail.help.util.Utilities;
-import com.example.mikhail.help.web.RequestListener;
-import com.example.mikhail.help.web.RetrofitRequest;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.SupportMapFragment;
-
-import java.util.HashMap;
-
-import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -178,7 +170,12 @@ public class MainActivity extends AppCompatActivity {
         mProfileImageContainer.setOnClickListener(listener.onClickProfileImage);
         mFindsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         mShopLayout.setOnClickListener(listener.onClickItemDrawerMenu);
-        mAccountManageLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mAccountManageLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), AccountSettingsActivity.class));
+            }
+        });
         mSettingsLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -215,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         int dp8 = Utilities.getPxFromDp(8, this), dp16 = Utilities.getPxFromDp(16, this);
 
         mGeoDataClient = Places.getGeoDataClient(this);
-        mAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient, null, null);
+        mAdapter = new PlaceAutocompleteAdapter(this);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         LinearLayout linearLayout = (LinearLayout) searchItem.getActionView();
@@ -267,7 +264,10 @@ public class MainActivity extends AppCompatActivity {
         textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mapHandler.goToPlace(textView.getText().toString());
+                // mapHandler.goToPlace(textView.getText().toString());
+
+                Place place = (Place) adapterView.getItemAtPosition(i);
+                mapHandler.moveCameraToPosition(place.getLocation(), 15f);
 
                 searchClose(textView, imageView);
             }
@@ -276,7 +276,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onKey(View view, int i, KeyEvent keyEvent) {
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    mapHandler.goToPlace(textView.getText().toString());
+                    // mapHandler.goToPlace(textView.getText().toString());
+
+                    mapHandler.moveCameraToPosition(mAdapter.getItem(0).getLocation(), 15f);
 
                     searchClose(textView, imageView);
                 }
@@ -288,6 +290,15 @@ public class MainActivity extends AppCompatActivity {
         linearLayout.addView(imageView);
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void searchClose(AutoCompleteTextView textView, ImageView imageView) {
@@ -332,8 +343,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case LOCATION_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0) {
-                    for (int i = 0; i < grantResults.length; i++) {
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    for (int grantResult : grantResults) {
+                        if (grantResult != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionGranted = false;
                             Log.d(TAG, "onRequestPermissionsResult: permission failed");
                             return;
@@ -372,16 +383,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //-------------ACCOUNT-------------
-
-    public void openAuthorizationActivity() {
-        Intent intent = new Intent(getBaseContext(), AuthorizationActivity.class);
-        startActivityForResult(intent, REQUEST_ACCOUNT);
-    }
-
-    public void openInternetConnection(Context context) {
-        Intent intent = new Intent(context, InternetConnection.class);
-        startActivity(intent);
-    }
 
     private void showName(String name) {
         mNameEditLayout.setEnabled(true);

@@ -1,6 +1,7 @@
 package com.example.mikhail.help;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +23,10 @@ import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -56,6 +61,7 @@ public class MapHandler implements OnMapReadyCallback {
     private static final String ANIMATED_MOVE = "Animated";
     private static final String DEFAULT_MOVE = "Default";
     private static final int OK = 0;
+    static boolean isInfoActivityOpen;
     private final String
             ICON = "icon",
             ADDRESS = "address",
@@ -89,15 +95,13 @@ public class MapHandler implements OnMapReadyCallback {
             else moveCameraToLocation(location, currentZoom, ANIMATED_MOVE);
         }
     };
-
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationCallback mLocationCallback;
     private Context context;
     private HashMap<String, Place> showingPlaces = new HashMap<>();
     private FocusedPlace focusedPlace;
 
-    public static boolean isInfoActivityOpen;
-
-    public MapHandler(Context context) {
+    MapHandler(Context context) {
         isInfoActivityOpen = false;
         this.context = context;
     }
@@ -123,7 +127,7 @@ public class MapHandler implements OnMapReadyCallback {
 
     }
 
-    public void getUserLastLocation() {
+    private void getUserLastLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -134,7 +138,6 @@ public class MapHandler implements OnMapReadyCallback {
                         Location location = task.getResult();
                         if (location != null) {
                             onUserLocationFind(location);
-                        } else {
                         }
                     } else {
                         Log.e(TAG, "onComplete: task is failtured");
@@ -142,7 +145,6 @@ public class MapHandler implements OnMapReadyCallback {
                     }
                 }
             });
-        } else {
         }
     }
 
@@ -151,10 +153,34 @@ public class MapHandler implements OnMapReadyCallback {
         this.location = location;
     }
 
+    private List<Place> checkNearPlaces(Location location) {
+        for (Place place : showingPlaces.values()) {
+            if (SphericalUtil.computeDistanceBetween(place.getLocation(), new LatLng(location.getLatitude(), location.getLongitude())) < 20) {
+                Log.d(TAG, "checkNearPlaces: near_place! " + place.getId());
+            }
+        }
+        return null;
+    }
+
+    @SuppressLint("MissingPermission")
     private void mapSetup() {
         Log.d(TAG, "mapSetup: setup starting");
+        LocationListener mListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+        };
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        mFusedLocationProviderClient.requestLocationUpdates(LocationRequest.create(), new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                Log.d(TAG, "onLocationResult: " + locationResult.getLastLocation().getLatitude() + locationResult.getLastLocation().getLongitude());
+            }
+        }, null);
         for (int i = 0; i < mThumbIds.length; i++)
-            iconByType.put(mThumbTypes[i], Integer.valueOf(mThumbIds[i]));
+            iconByType.put(mThumbTypes[i], mThumbIds[i]);
         mMap.getUiSettings().setRotateGesturesEnabled(false);
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
@@ -192,7 +218,7 @@ public class MapHandler implements OnMapReadyCallback {
                                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
                                 Double needDistance = (x1 - x2) * 30000f;
                                 if (!showingPlaces.keySet().contains(currentPlace.getId()) && Arrays.asList(mThumbTypes).contains(currentPlace.getType())) {
-                                    currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.DarkGrey)));
+                                    currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.darkGrey)));
                                     currentPlace.getMarker().setAnchor(0.5f, 0.5f);
                                     if (focusedPlace != null && SphericalUtil.computeDistanceBetween(focusedPlace.getLocation(), currentPlace.getLocation()) < needDistance)
                                         focusedPlace.addHidedPlace(currentPlace);
@@ -228,6 +254,8 @@ public class MapHandler implements OnMapReadyCallback {
                 }
             }
         });
+
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -313,7 +341,7 @@ public class MapHandler implements OnMapReadyCallback {
         }
     }
 
-    private void placeOpen(final float needDistance, final FocusedPlace focusedPlace) {
+    public void placeOpen(final float needDistance, final FocusedPlace focusedPlace) {
 
         focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
 
@@ -326,7 +354,7 @@ public class MapHandler implements OnMapReadyCallback {
         final float tintColorChangePerTime = (255f - startColor) / animationTimes;
         final float tintAlphaPerTime = (startAlpha - endAlpha) / animationTimes;
 
-        final Handler myHandler = new Handler() {
+        @SuppressLint("HandlerLeak") final Handler myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 int time = msg.what;
@@ -361,14 +389,14 @@ public class MapHandler implements OnMapReadyCallback {
 
     }
 
-    public void goToPlace(String place) {
+    void goToPlace(String place) {
 
         Geocoder geocoder = new Geocoder(context);
         List<Address> list = new ArrayList<>();
 
         try {
             list = geocoder.getFromLocationName(place, 1);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
 
@@ -381,13 +409,14 @@ public class MapHandler implements OnMapReadyCallback {
         }
     }
 
-    public void openInfoActivity() {
+    private void openInfoActivity() {
 
         isInfoActivityOpen = true;
 
         Intent intent = new Intent(context, InfoActivity.class);
         intent.putExtra(NAME, focusedPlace.getName());
         intent.putExtra(DESCRIPTION, focusedPlace.getDescription());
+        //TODO: передавать ссылку вместо изображения
         intent.putExtra(IMAGE, Utilities.getStringImage(focusedPlace.getImage()));
         intent.putExtra(ICON, iconByType.get(focusedPlace.getType()));
         intent.putExtra(LATITUDE, focusedPlace.getLatitude());
@@ -397,8 +426,7 @@ public class MapHandler implements OnMapReadyCallback {
     }
 
 
-
-    private void moveCameraToPosition(LatLng position, float zoom) {
+    public void moveCameraToPosition(LatLng position, float zoom) {
         CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(zoom).build();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
         mMap.animateCamera(cameraUpdate);

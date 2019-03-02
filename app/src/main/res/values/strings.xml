@@ -26,7 +26,9 @@
     <string name="sign_in">Sign in</string>
     <string name="warning">Warning</string>
     <string name="no_sign_in_continue">If you continue without an account, many features of the application will be unavailable</string>
+    <string name="no_provide">The author doesn\'t ensure the security of your data! Please enter unreal email and password!</string>
     <string name="scontinue">Continue</string>
+    <string name="cancel">Cancel</string>
 
     <string name="place">Place</string>
     <string name="event">Event</string>
@@ -85,7 +87,6 @@
     <string name="no_connection">No connection</string>
     <string name="can_not_get_position">We can\'t\ get your position</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_internet_connection">InternetConnection</string>
     <string name="email">Email</string>
 
@@ -101,5 +102,28 @@
 
     <string name="show_hints">Show hints</string>
     <string name="default_is_on">Default is on</string>
+
+    <string name="change_email">Change email</string>
+    <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_email">New email</string>
+    <string name="log_out">Log out</string>
+    <string name="important">Important!</string>
+    <string name="do_you_want_to_log_out">Do you really want to leave from your current account?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="new_password">New password</string>
+    <string name="repeat_new_password">Repeat password</string>
+    <string name="passwords_different">Passwords are different!</string>
+    <string name="move_finger_to_continue">Move finger to continue</string>
+    <string name="welcome">Welcome!</string>
+    <string name="tap" translatable="false">tap</string>
+    <string name="find_interesting_places">Find interesting places!</string>
+    <string name="be_a_part_of_event">Be a part of event!</string>
+    <string name="have_a_friend">Have a friend!</string>
+    <string name="or">or</string>
+    <string name="continue_with_account">Continue</string>
+    <string name="try_it">Try it</string>
+    <string name="i_hope_you_remember_your_password">I hope you remember your password!</string>
 
 </resources>

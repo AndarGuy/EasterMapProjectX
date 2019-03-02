@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import retrofit2.Call;
@@ -18,7 +19,7 @@ public class RetrofitRequest {
     private static final String TAG = "RetrofitRequest";
 
     final String RESULT = "result", EMAIL = "email", PASSWORD = "password";
-    String server = "http://46.101.128.42";
+    String server = "http://209.97.185.108";
     String action, nextAction;
     String email, password;
     HashMap<String, String> postDataParams = new HashMap<>();
@@ -76,6 +77,23 @@ public class RetrofitRequest {
                 listener.onFailure(call, t);
             }
         });
+    }
+
+    public Answer makeExecuteRequest() {
+        putParam(action, nextAction);
+        putParam(EMAIL, email);
+        putParam(PASSWORD, password);
+
+        Call<Object> call = req.performPostCall(postDataParams);
+        try {
+            Response<Object> response = call.execute();
+            HashMap<String, String> map = gson.fromJson(gson.toJson(response.body()), HashMap.class);
+            Integer result = Integer.valueOf(map.get(RESULT));
+            return new Answer(call, map, result);
+        } catch (IOException e) {
+            Log.d(TAG, "makeExecuteRequest: execute request error!");
+            return null;
+        }
     }
 
     public void putParam(String key, String value) {

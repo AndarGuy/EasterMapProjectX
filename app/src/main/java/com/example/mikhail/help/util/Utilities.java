@@ -11,6 +11,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -24,6 +25,52 @@ import java.io.ByteArrayOutputStream;
 public final class Utilities {
 
     private static final String TAG = "Utilities";
+
+    private static final int
+            INVALID_EMAIL = 2,
+            LENGTH_ERROR = 1;
+    private static final int OK = 0;
+    private static final int
+            MAX_PASSWORD_LENGTH = 32,
+            MIN_PASSWORD_LENGTH = 6;
+
+    public static int isEmailCorrect(String email) {
+        if (!Utilities.isValidEmail(email)) {
+            return INVALID_EMAIL;
+        } else {
+            return OK;
+        }
+    }
+
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    public static int isPasswordCorrect(String password) {
+        if (password.length() > MAX_PASSWORD_LENGTH || password.length() < MIN_PASSWORD_LENGTH) {
+            return LENGTH_ERROR;
+        } else {
+            return OK;
+        }
+    }
 
     public static int getPxFromDp(int dp, Context context) {
         Resources r = context.getResources();

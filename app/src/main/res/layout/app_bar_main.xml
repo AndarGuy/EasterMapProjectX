@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     style="@style/MainToolbar"
     app:titleTextColor="@color/white"
+    android:elevation="6dp"
     app:title="@string/map"
     android:foregroundTint="@color/white">
 

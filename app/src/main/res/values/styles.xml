@@ -67,7 +67,7 @@
     <style name="Text" />
 
     <style name="Text.Before">
-        <item name="android:textColor">@color/DarkGrey</item>
+        <item name="android:textColor">@color/darkGrey</item>
     </style>
     <style name="Text.After">
         <item name="android:textColor">@color/colorAccent</item>
@@ -114,7 +114,7 @@
     </style>
 
     <style name="Text.NameTitle.Dark" parent="Text.NameTitle">
-        <item name="android:textColor">@color/DarkGrey</item>
+        <item name="android:textColor">@color/darkGrey</item>
     </style>
 
     <style name="Text.LightTitle" parent="Text">
