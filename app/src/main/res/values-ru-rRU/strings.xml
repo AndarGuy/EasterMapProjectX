@@ -93,7 +93,7 @@
     <string-array name="types_places">
         <item>Граффити</item>
         <item>Памятник</item>
-        <item>Место съемки фильма</item>
+        <item>Место съемки</item>
         <item>Вид</item>
         <item>Церковь</item>
         <item>Памятное здание</item>
@@ -127,5 +127,16 @@
     <string name="kilometers">километров</string>
     <string name="send_a_comment">Отправить комментарий</string>
     <string name="send">Отправить</string>
+    <string name="select_date">Укажите дату</string>
+    <string name="select_time">Укажите время</string>
+    <string name="beginning">Начало</string>
+    <string name="ending">Конец</string>
+    <string name="check_dates">Проверьте указанные параметры</string>
+    <string name="min_event_duration">Минимальная длительность события - %d минут</string>
+    <string name="events_cant_be_started_before_current_date">События не могут начинаться задним числом</string>
+    <string name="event_added">Cобытие добавлено!</string>
+    <string name="event_adding_error">Не удалось добавить событие!</string>
+    <string name="event_finished">Событие закончилось</string>
+    <string name="join">Присоединиться</string>
 
 </resources>

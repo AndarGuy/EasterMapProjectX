@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="72dp"
-    android:layout_height="72dp"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
     android:layout_margin="12dp"
     android:background="@drawable/type_list_item_bg"
     android:elevation="2dp"
@@ -9,14 +9,14 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="33dp">
+        android:layout_height="36dp">
 
         <ImageView
             android:id="@+id/image"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center|top"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:tint="@color/darkGrey" />
     </FrameLayout>
 

@@ -14,9 +14,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.Event;
 import com.example.mikhail.help.util.FocusedPlace;
 import com.example.mikhail.help.util.Place;
 import com.example.mikhail.help.util.Utilities;
@@ -34,6 +37,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -45,9 +50,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.maps.android.SphericalUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -57,17 +65,23 @@ import retrofit2.Call;
 public class MapHandler implements OnMapReadyCallback {
 
     private static final String TAG = "MapHandler";
-    private static final float DEFAULT_ZOOM = 15f;
+    private static final float DEFAULT_ZOOM = 15f, EVENT_ZOOM = 10f;
+    private static final float VIEW_ZONE_OFFSET = 0.5f;
     private static final String ANIMATED_MOVE = "Animated";
     private static final String DEFAULT_MOVE = "Default";
     private static final int OK = 0;
+    public static Location location;
     static boolean isInfoActivityOpen;
     private final String
             ICON = "icon",
-            ADDRESS = "address",
+            STATE = "state",
+            EVENT = "event",
             DESCRIPTION = "description",
             NAME = "name",
             IMAGE = "image",
+            START_DATE = "start_date",
+            END_DATE = "end_date",
+            SIZE = "size",
             INFO = "info",
             TYPE = "type",
             ID = "id",
@@ -84,7 +98,6 @@ public class MapHandler implements OnMapReadyCallback {
             R.drawable.ic_egg_easter};
     private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
     private final HashMap<String, Integer> iconByType = new HashMap<>();
-    public static Location location;
     private GoogleMap mMap;
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
@@ -99,6 +112,7 @@ public class MapHandler implements OnMapReadyCallback {
     private LocationCallback mLocationCallback;
     private Context context;
     private HashMap<String, Place> showingPlaces = new HashMap<>();
+    private HashMap<String, Event> showingEvents = new HashMap<>();
     private FocusedPlace focusedPlace;
 
     MapHandler(Context context) {
@@ -199,7 +213,8 @@ public class MapHandler implements OnMapReadyCallback {
                 VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
                 LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
                 final Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
-                RetrofitRequest request = new RetrofitRequest(PLACE, GET);
+
+                final RetrofitRequest request = new RetrofitRequest(PLACE, GET);
                 request.putParam(FROM_X, x1.toString());
                 request.putParam(FROM_Y, y1.toString());
                 request.putParam(TO_X, x2.toString());
@@ -226,12 +241,58 @@ public class MapHandler implements OnMapReadyCallback {
                                     showingPlaces.put(currentPlace.getId(), currentPlace);
                                 }
                             }
-                            for (String id : ((HashMap<String, Place>) showingPlaces.clone()).keySet()) {
-                                Place place = showingPlaces.get(id);
-                                double x = place.getLatitude(), y = place.getLongitude();
-                                if (!(x < x1 && x > x2 && y > y1 && y < y2)) {
-                                    place.removeMarker();
-                                    showingPlaces.remove(id);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Object> call, Throwable t) {
+                        Log.d(TAG, "onFailure: errorrrrrrrr!!!!" + t.toString() + " " + t.getMessage());
+                    }
+                });
+                request.makeRequest();
+
+                final RetrofitRequest request1 = new RetrofitRequest(EVENT, GET);
+                request1.putParam(FROM_X, x1.toString());
+                request1.putParam(FROM_Y, y1.toString());
+                request1.putParam(TO_X, x2.toString());
+                request1.putParam(TO_Y, y2.toString());
+
+                request1.setListener(new RequestListener() {
+                    @Override
+                    public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                        Log.d(TAG, "onResponse: " + response);
+                        if (result == OK) {
+                            Gson gson = new Gson();
+                            Calendar currentDate = Calendar.getInstance();
+                            for (int i = 0; i < response.keySet().size() - 1; i++) {
+                                HashMap<String, String> tempEvent = gson.fromJson(gson.toJson(response.get(String.valueOf(i))), HashMap.class);
+
+                                String startDateStr = tempEvent.get(START_DATE), endDateStr = tempEvent.get(END_DATE);
+                                Calendar startDate = Utilities.parseDateFromString(startDateStr), endDate = Utilities.parseDateFromString(endDateStr);
+
+                                Event currentEvent = new Event(tempEvent.get(ID), Integer.valueOf(tempEvent.get(SIZE)), startDate, endDate, Double.valueOf(tempEvent.get(LATITUDE)), Double.valueOf(tempEvent.get(LONGITUDE)));
+
+                                if (!showingEvents.keySet().contains(currentEvent.getId())) {
+
+                                    int color;
+
+                                    if (currentEvent.getState() == Event.STATE_SIMPLE) {
+                                        color = ContextCompat.getColor(context, R.color.colorAccent);
+                                    } else if (currentEvent.getState() == Event.STATE_PAST) {
+                                        color = ContextCompat.getColor(context, R.color.darkGrey);
+                                    } else {
+                                        color = ContextCompat.getColor(context, R.color.softBlue);
+                                    }
+
+                                    CircleOptions options = new CircleOptions()
+                                            .center(currentEvent.getLocation())
+                                            .fillColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)))
+                                            .strokeWidth(10).strokeColor(color)
+                                            .radius(currentEvent.getSize())
+                                            .clickable(true);
+                                    currentEvent.addCircle(mMap, options);
+                                    showingEvents.put(currentEvent.getId(), currentEvent);
+                                    Log.d(TAG, "onResponse: Event " + currentEvent.getId() + " added!");
                                 }
                             }
                         }
@@ -242,15 +303,56 @@ public class MapHandler implements OnMapReadyCallback {
                         Log.d(TAG, "onFailure: errorrrrrrrr!!!!" + t.toString() + " " + t.getMessage());
                     }
                 });
-                request.makeRequest();
+                if (mMap.getCameraPosition().zoom >= EVENT_ZOOM) {
+                    request1.makeRequest();
+                }
+
+                double offsetX = (x1 - x2) * VIEW_ZONE_OFFSET, offsetY = (y2 - y1) * VIEW_ZONE_OFFSET;
+
+                for (String id : ((HashMap<String, Place>) showingPlaces.clone()).keySet()) {
+                    Place place = showingPlaces.get(id);
+                    double x = place.getLatitude(), y = place.getLongitude();
+                    if (!(x - offsetX < x1 && x + offsetX > x2 && y + offsetY > y1 && y - offsetY < y2)) {
+                        place.removeMarker();
+                        showingPlaces.remove(id);
+                    }
+                }
+
+                for (String id : ((HashMap<String, Event>) showingEvents.clone()).keySet()) {
+                    Event event = showingEvents.get(id);
+                    double x = event.getLatitude(), y = event.getLongitude();
+                    if (!(x - offsetX < x1 && x + offsetX > x2 && y + offsetY > y1 && y - offsetY < y2)) {
+                        event.removeCircle();
+                        showingEvents.remove(id);
+                    }
+                }
             }
         });
+
         mMap.setOnGroundOverlayClickListener(new GoogleMap.OnGroundOverlayClickListener() {
             @Override
             public void onGroundOverlayClick(GroundOverlay groundOverlay) {
                 Log.d(TAG, "onGroundOverlayClick: clicek");
                 if (focusedPlace.getImage() != null && focusedPlace.getOverlay().equals(groundOverlay)) {
-                    openInfoActivity();
+                    openInfoPlaceActivity();
+                }
+            }
+        });
+
+        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+            @Override
+            public void onCircleClick(Circle circle) {
+                Log.d(TAG, "onCircleClick: clicek");
+                for (String id : showingEvents.keySet()) {
+                    if (circle.equals(showingEvents.get(id).getCircle())) {
+                        if (showingEvents.get(id).getState() == Event.STATE_PAST) {
+                            Toast.makeText(context, R.string.event_finished, Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (!isInfoActivityOpen) {
+                                openInfoEventActivity(showingEvents.get(id));
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -271,7 +373,7 @@ public class MapHandler implements OnMapReadyCallback {
                 }
                 if (focusedPlace != null && focusedPlace.getId().equals(marker.getTitle())) {
                     if (!isInfoActivityOpen && focusedPlace.getImage() != null) {
-                        openInfoActivity();
+                        openInfoPlaceActivity();
                     }
                     return true;
                 }
@@ -301,12 +403,13 @@ public class MapHandler implements OnMapReadyCallback {
                                 crop = Bitmap.createBitmap(image, 0, image.getHeight() / 2 - image.getWidth() / 2, image.getWidth(), image.getWidth());
                             else
                                 crop = Bitmap.createBitmap(image, image.getWidth() / 2 - image.getHeight() / 2, 0, image.getHeight(), image.getHeight());
-                            Bitmap scaled = Bitmap.createScaledBitmap(crop, 300, 300, true);
+
+                            Bitmap scaled = Bitmap.createScaledBitmap(crop, 300, 300, false);
                             Bitmap circled = Utilities.getCircledBitmap(scaled);
-                            Bitmap circledWithBorders = Utilities.addBorderToRoundedBitmap(circled, 150, 10, Color.WHITE);
+                            Bitmap circledWithBorders = Utilities.addBorderToRoundedBitmap(circled, 150, 15, Color.WHITE);
                             try {
                                 focusedPlace.getOverlay().setImage(BitmapDescriptorFactory.fromBitmap(circledWithBorders));
-                                focusedPlace.setImage(image);
+                                focusedPlace.setImage(image, context);
                                 focusedPlace.setDescription(description);
                                 focusedPlace.setName(name);
                             } catch (Exception e) {
@@ -333,6 +436,9 @@ public class MapHandler implements OnMapReadyCallback {
 
     private void unfocusedPlace() {
         if (focusedPlace != null) {
+            if (focusedPlace.getImagePath() != null && !focusedPlace.getImagePath().isEmpty()) {
+                new File(focusedPlace.getImagePath()).delete();
+            }
             if (focusedPlace.getOverlay() != null)
                 focusedPlace.removeOverlay();
             focusedPlace.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(focusedPlace.getIcon()));
@@ -409,18 +515,36 @@ public class MapHandler implements OnMapReadyCallback {
         }
     }
 
-    private void openInfoActivity() {
+    private void openInfoPlaceActivity() {
 
         isInfoActivityOpen = true;
 
-        Intent intent = new Intent(context, InfoActivity.class);
+        Intent intent = new Intent(context, InfoPlaceActivity.class);
+
+        intent.putExtra(ID, focusedPlace.getId());
         intent.putExtra(NAME, focusedPlace.getName());
         intent.putExtra(DESCRIPTION, focusedPlace.getDescription());
-        //TODO: передавать ссылку вместо изображения
-        intent.putExtra(IMAGE, Utilities.getStringImage(focusedPlace.getImage()));
+        intent.putExtra(IMAGE, focusedPlace.getImagePath());
         intent.putExtra(ICON, iconByType.get(focusedPlace.getType()));
         intent.putExtra(LATITUDE, focusedPlace.getLatitude());
         intent.putExtra(LONGITUDE, focusedPlace.getLongitude());
+
+
+        context.startActivity(intent);
+    }
+
+    private void openInfoEventActivity(Event event) {
+
+        isInfoActivityOpen = true;
+
+        Intent intent = new Intent(context, InfoEventActivity.class);
+        intent.putExtra(ID, event.getId());
+        intent.putExtra(STATE, event.getState());
+        intent.putExtra(START_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getStartDate()));
+        intent.putExtra(END_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getEndDate()));
+        intent.putExtra(SIZE, event.getSize());
+        intent.putExtra(LATITUDE, event.getLatitude());
+        intent.putExtra(LONGITUDE, event.getLongitude());
 
         context.startActivity(intent);
     }

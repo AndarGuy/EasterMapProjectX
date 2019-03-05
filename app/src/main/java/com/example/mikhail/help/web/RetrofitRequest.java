@@ -4,10 +4,13 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,18 +21,20 @@ public class RetrofitRequest {
 
     private static final String TAG = "RetrofitRequest";
 
-    final String RESULT = "result", EMAIL = "email", PASSWORD = "password";
-    String server = "http://209.97.185.108";
-    String action, nextAction;
-    String email, password;
-    HashMap<String, String> postDataParams = new HashMap<>();
-    RequestListener listener;
-    Gson gson = new GsonBuilder().setLenient().create();
-    Retrofit retrofit = new Retrofit.Builder()
+    private final String RESULT = "result", EMAIL = "email", PASSWORD = "password";
+    private String server = "http://209.97.185.108";
+    private String action, nextAction;
+    private String email, password;
+    private HashMap<String, String> postDataParams = new HashMap<>();
+    private RequestListener listener;
+    private Gson gson = new GsonBuilder().setLenient().create();
+    private OkHttpClient client = new OkHttpClient.Builder().readTimeout(30, TimeUnit.SECONDS).connectTimeout(30, TimeUnit.SECONDS).build();
+    private Retrofit retrofit = new Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .client(client)
             .baseUrl(server)
             .build();
-    Request req = retrofit.create(Request.class);
+    private Request req = retrofit.create(Request.class);
 
     public RetrofitRequest(String action) {
         this.action = action;
@@ -66,9 +71,8 @@ public class RetrofitRequest {
                     HashMap<String, String> map = gson.fromJson(gson.toJson(response.body()), HashMap.class);
                     Integer result = Integer.valueOf(map.get(RESULT));
                     listener.onResponse(call, map, result);
-                } catch (Exception e) {
-                    Log.e(TAG, "onResponse: " + e.getLocalizedMessage(), e);
-                    listener.onFailure(call, e);
+                } catch (JsonSyntaxException | IllegalStateException | NullPointerException e) {
+                    Log.d(TAG, "ERROR: " + response.body());
                 }
             }
 
@@ -101,6 +105,10 @@ public class RetrofitRequest {
             if (value == null) value = "null";
             this.postDataParams.put(key, value);
         }
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 
     public void setListener(RequestListener listener) {

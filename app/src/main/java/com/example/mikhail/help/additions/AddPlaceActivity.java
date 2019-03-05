@@ -1,10 +1,7 @@
 package com.example.mikhail.help.additions;
 
-import android.accessibilityservice.AccessibilityService;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.inputmethodservice.Keyboard;
-import android.inputmethodservice.KeyboardView;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
@@ -27,7 +24,6 @@ import com.example.mikhail.help.util.ViewPagerAdapter;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.maps.model.LatLng;
-import com.rw.keyboardlistener.KeyboardUtils;
 
 import java.util.HashMap;
 
@@ -182,8 +178,9 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                         tabLayout.getTabAt(tabLayout.getSelectedTabPosition() - 1).select();
                     else if (image == null) shakeView(findViewById(R.id.imageBackground));
                     else if (name == null) shakeView(findViewById(R.id.nameTextLayout));
-                    else if (description == null) shakeView(findViewById(R.id.descriptionInput));
+                    else if (description == null || description.length() <= 0) shakeView(findViewById(R.id.descriptionInput));
                     else {
+                        Log.d(TAG, "onClick: " + name + " " + name.length());
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AddPlaceActivity.this);
                         final RetrofitRequest request = new RetrofitRequest(PLACE, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
                         request.putParam(NAME, name);
@@ -207,6 +204,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                             @Override
                             public void onFailure(Call<Object> call, Throwable t) {
                                 Log.d(TAG, "onFailure: adding place error: " + t.toString());
+                                Toast.makeText(AddPlaceActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
                             }
                         });
                         request.makeRequest();
@@ -263,21 +261,21 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
     }
 
     private void sendPositionBundles(Bundle bundle, PositionFragment fragment) {
-        bundle.putDouble(fragment.KEY_LATITUDE, Double.valueOf(getIntent().getExtras().getString("Latitude")));
-        bundle.putDouble(fragment.KEY_LONGITUDE, Double.valueOf(getIntent().getExtras().getString("Longitude")));
-        bundle.putDouble(fragment.KEY_RADIUS, 0.001);
+        bundle.putDouble(PositionFragment.KEY_LATITUDE, Double.valueOf(getIntent().getExtras().getString("Latitude")));
+        bundle.putDouble(PositionFragment.KEY_LONGITUDE, Double.valueOf(getIntent().getExtras().getString("Longitude")));
+        bundle.putDouble(PositionFragment.KEY_RADIUS, 0.001);
     }
 
     private void sendTypeBundles(Bundle bundle, TypeFragment fragment) {
-        bundle.putStringArray(fragment.KEY_THUMB_CODES, mThumbTypes);
-        bundle.putIntArray(fragment.KEY_THUMB_IDS, mThumbIds);
-        bundle.putStringArray(fragment.KEY_THUMB_NAMES, getResources().getStringArray(R.array.types_places));
+        bundle.putStringArray(TypeFragment.KEY_THUMB_CODES, mThumbTypes);
+        bundle.putIntArray(TypeFragment.KEY_THUMB_IDS, mThumbIds);
+        bundle.putStringArray(TypeFragment.KEY_THUMB_NAMES, getResources().getStringArray(R.array.types_places));
 
     }
 
     private void sendDataBundles(Bundle bundle, DataFragment fragment) {
-        bundle.putByte(fragment.KEY_NAME_MAX_LEN, maxNameLength);
-        bundle.putByte(fragment.KEY_NAME_MIN_LEN, minNameLength);
+        bundle.putByte(DataFragment.KEY_NAME_MAX_LEN, maxNameLength);
+        bundle.putByte(DataFragment.KEY_NAME_MIN_LEN, minNameLength);
     }
 
     @Override

@@ -20,11 +20,11 @@
         android:fontFamily="@font/roboto_medium"
         android:text="300 meters"
         android:textColor="@color/darkGrey"
-        android:layout_gravity="bottom|end"
-        android:textSize="14dp" />
+        android:layout_gravity="top|end"
+        android:textSize="14sp" />
 
     <FrameLayout
         android:id="@+id/touchLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
+        android:layout_height="match_parent"/>
 </FrameLayout>

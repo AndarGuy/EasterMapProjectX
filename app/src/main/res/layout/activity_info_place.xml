@@ -5,8 +5,9 @@
     android:id="@+id/mainDataLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:orientation="vertical"
-    tools:context=".InfoActivity">
+    tools:context=".InfoPlaceActivity">
 
     <LinearLayout
         android:layout_width="0px"
@@ -19,8 +20,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -96,12 +97,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <include layout="@layout/comment_sample" />
-
-                    <include layout="@layout/comment_sample" />
-
-                    <include layout="@layout/comment_sample" />
 
                 </LinearLayout>
             </LinearLayout>

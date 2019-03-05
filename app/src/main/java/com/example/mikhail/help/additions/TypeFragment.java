@@ -65,6 +65,7 @@ public class TypeFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
             if (mSelectImage != null) {
                 mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.darkGrey)));
+                mSelectImage.refreshDrawableState();
             }
             if (mSelectText != null) {
                 mSelectText.setTextColor(getResources().getColor(R.color.darkGrey));
@@ -73,6 +74,7 @@ public class TypeFragment extends Fragment {
             mSelectImage = v.findViewById(R.id.image);
             mSelectText.setTextColor(getResources().getColor(R.color.colorAccent));
             mSelectImage.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccent)));
+            mSelectImage.refreshDrawableState();
             mListener.OnSendCode(mThumbCodes[position]);
         }
 

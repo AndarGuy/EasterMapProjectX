@@ -128,5 +128,18 @@
     <string name="i_hope_you_remember_your_password">I hope you remember your password!</string>
     <string name="send_a_comment">Send a comment</string>
     <string name="send">Send</string>
+    <string name="select_date">Select date</string>
+    <string name="select_time">Select time</string>
+    <string name="beginning">Beginning</string>
+    <string name="ending">Ending</string>
+    <string name="check_dates">Please, check your dates!</string>
+    <string name="min_event_duration">Minimum event duration is %d minutes</string>
+    <string name="events_cant_be_started_before_current_date">Event\'s starting date can\'t be before current</string>
+    <string name="event_added">Event added!</string>
+    <string name="event_adding_error">Event not added!</string>
+
+    <string name="event_finished">The event has been finished</string>
+    <string name="join">Join</string>
+
 
 </resources>

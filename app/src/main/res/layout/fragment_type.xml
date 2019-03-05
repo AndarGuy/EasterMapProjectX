@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/white"
+    android:background="@color/background"
     tools:context=".additions.TypeFragment">
 
     <GridView
@@ -13,9 +13,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:columnWidth="72dp"
-        android:numColumns="5"
-        android:stretchMode="spacingWidth"
-        android:verticalSpacing="10dp" />
+        android:columnWidth="80dp"
+        android:numColumns="4"
+        android:stretchMode="columnWidth"
+        android:horizontalSpacing="8dp"
+        android:verticalSpacing="8dp" />
 
 </FrameLayout>

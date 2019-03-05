@@ -21,6 +21,10 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public final class Utilities {
 
@@ -42,17 +46,30 @@ public final class Utilities {
         }
     }
 
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Calendar parseDateFromString(String dateStr) {
+        String[] dateAndTime = dateStr.split(" ");
+        String[] date = dateAndTime[0].split("-");
+        String[] time = dateAndTime[1].split(":");
+        return new GregorianCalendar(
+                Integer.valueOf(date[0]),
+                Integer.valueOf(date[1]) - 1,
+                Integer.valueOf(date[2]),
+                Integer.valueOf(time[0]),
+                Integer.valueOf(time[1]),
+                Integer.valueOf(time[2]));
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
+            if (bitmapDrawable.getBitmap() != null) {
                 return bitmapDrawable.getBitmap();
             }
         }
 
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
         } else {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -223,6 +240,32 @@ public final class Utilities {
         srcBitmap.recycle();
 
         return dstBitmap;
+    }
+
+    public static void saveBitmap(Bitmap bitmap, String path) {
+        if (bitmap != null) {
+            try {
+                FileOutputStream outputStream = null;
+                try {
+                    outputStream = new FileOutputStream(path);
+
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (outputStream != null) {
+                            outputStream.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

@@ -9,11 +9,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -210,7 +212,22 @@ public class TutorialActivity extends FragmentActivity {
 
             body.addView(tap);
 
-            tap.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.tap));
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+
+            TranslateAnimation animation = new TranslateAnimation(
+                    Animation.ABSOLUTE, 0,
+                    Animation.ABSOLUTE, -width + Utilities.getPxFromDp(168, getContext()),
+                    Animation.ABSOLUTE, 0,
+                    Animation.ABSOLUTE, 0
+            );
+
+            animation.setDuration(2000);
+
+            animation.setRepeatCount(Animation.INFINITE);
+
+            tap.setAnimation(animation);
             tap.getAnimation().start();
 
             return v;

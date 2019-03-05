@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mikhail.help.util.FocusedPlace;
 import com.example.mikhail.help.util.NameHelper;
@@ -278,7 +279,11 @@ public class MainActivity extends AppCompatActivity {
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                     // mapHandler.goToPlace(textView.getText().toString());
 
-                    mapHandler.moveCameraToPosition(mAdapter.getItem(0).getLocation(), 15f);
+                    try {
+                        mapHandler.moveCameraToPosition(mAdapter.getItem(0).getLocation(), 15f);
+                    } catch (IndexOutOfBoundsException e) {
+                        Toast.makeText(MainActivity.this, R.string.nothing_found, Toast.LENGTH_LONG).show();
+                    }
 
                     searchClose(textView, imageView);
                 }

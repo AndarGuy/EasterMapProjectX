@@ -64,11 +64,21 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="Button.Raised.Primary" parent="Button.Raised">
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+    </style>
+
+    <style name="Button.Border" parent="Button">
+        <item name="android:textColor">@color/darkGrey</item>
+        <item name="android:background">@drawable/button_border</item>
+    </style>
+
     <style name="Text" />
 
     <style name="Text.Before">
         <item name="android:textColor">@color/darkGrey</item>
     </style>
+
     <style name="Text.After">
         <item name="android:textColor">@color/colorAccent</item>
     </style>

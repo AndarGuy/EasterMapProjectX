@@ -18,23 +18,21 @@
         <com.example.mikhail.help.util.CustomViewPager
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_height="match_parent" />
 
         <TextView
             android:id="@+id/hint"
             style="@style/Text.Menu"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
-            android:layout_marginBottom="16dp"
             android:background="@drawable/mini_fab_bg"
             android:backgroundTint="@color/white"
-            android:alpha="200"
-            android:paddingBottom="4dp"
-            android:paddingEnd="16dp"
             android:paddingStart="16dp"
-            android:paddingTop="4dp" />
+            android:paddingTop="4dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp"
+            android:textAlignment="center" />
 
     </FrameLayout>
 

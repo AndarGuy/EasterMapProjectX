@@ -38,7 +38,7 @@ public class DataFragment extends Fragment {
             KEY_NAME_MAX_LEN = "len_max",
             KEY_NAME_MIN_LEN = "len_min";
     static final int RESULT_OK = -1, REQUEST_TAKE_PHOTO = 1;
-    static final byte NAME_MAX_LENGTH = 25, NAME_MIN_LENGTH = 4;
+    static final byte NAME_MAX_LENGTH = 100, NAME_MIN_LENGTH = 4;
     private static final String TAG = "DataFragment";
     byte nameMaxLength, nameMinLength;
     ImageView mImageView;
@@ -106,8 +106,12 @@ public class DataFragment extends Fragment {
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
         mImageView.setImageBitmap(bitmap);
         if (bitmap.getWidth() > bitmap.getHeight())
-            compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 480, 320);
-        else compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 320, 480);
+            compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 240, 160);
+        else compressedBitmap = Utilities.resizeBitMapImage(mCurrentPhotoPath, 160, 240);
+        //ByteArrayOutputStream out = new ByteArrayOutputStream();
+        //compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
+        //Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+
         mListener.OnSendImage(compressedBitmap);
     }
 
