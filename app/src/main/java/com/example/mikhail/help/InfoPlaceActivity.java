@@ -12,7 +12,6 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,8 +24,12 @@ import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.gson.Gson;
 import com.rw.keyboardlistener.KeyboardUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import retrofit2.Call;
 
 public class InfoPlaceActivity extends AppCompatActivity {
@@ -52,11 +55,11 @@ public class InfoPlaceActivity extends AppCompatActivity {
             IMAGE = "image";
     private final int OK = 0;
     private EditText commentEdit;
-    private LinearLayout buttonLayout, commentContainer;
-    private TextView description, name, address;
+    private LinearLayout commentContainer;
+    private TextView description, name;
     private ImageView image, icon;
     private String imagePath;
-    private Button sendButton, cancelButton;
+    private CircleImageView avatar;
 
     private void setupToolbar() {
         Toolbar myToolbar = findViewById(R.id.toolbar);
@@ -74,14 +77,22 @@ public class InfoPlaceActivity extends AppCompatActivity {
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 Gson gson = new Gson();
                 if (result == OK) {
-                    Log.d(TAG, "onResponse: " + response);
+                    ArrayList<Message> messages = new ArrayList<>();
                     commentContainer.removeAllViewsInLayout();
                     for (int i = 0; i < response.keySet().size() - 1; i++) {
                         HashMap<String, String> tempMsg = gson.fromJson(gson.toJson(response.get(String.valueOf(i))), HashMap.class);
                         Message msg = new Message(tempMsg.get(USER), tempMsg.get(TEXT), Utilities.parseDateFromString(tempMsg.get(DATE)));
-                        addComment(msg, commentContainer);
-                        Log.d(TAG, "onResponse: " + msg.getName() + " " + msg.getText() + " " + msg.getDate().getTime());
+                        messages.add(msg);
                     }
+
+                    Collections.sort(messages, new Comparator<Message>() {
+                        @Override
+                        public int compare(Message o1, Message o2) {
+                            return o2.getDate().compareTo(o1.getDate());
+                        }
+                    });
+                    for (Message message : messages) addComment(message, commentContainer);
+
                 }
             }
 
@@ -123,7 +134,9 @@ public class InfoPlaceActivity extends AppCompatActivity {
     public void addComment(Message msg, LinearLayout layout) {
         LinearLayout commentSample = (LinearLayout) getLayoutInflater().inflate(R.layout.comment_sample, null);
         TextView msgName = commentSample.findViewById(R.id.msgNickname), msgText = commentSample.findViewById(R.id.msgText);
-        msgName.setText(msg.getName());
+        CircleImageView msgAvatar = commentSample.findViewById(R.id.avatar);
+        msgAvatar.setColorFilter(Utilities.getColorOfString(Utilities.formatName(msg.getName())));
+        msgName.setText(Utilities.formatName(msg.getName()));
         msgText.setText(msg.getText());
         layout.addView(commentSample);
     }
@@ -146,10 +159,10 @@ public class InfoPlaceActivity extends AppCompatActivity {
         image = findViewById(R.id.myImage);
         icon = findViewById(R.id.iconImage);
         commentEdit = findViewById(R.id.comment);
-        buttonLayout = findViewById(R.id.buttonLayout);
-        sendButton = findViewById(R.id.sendButton);
-        cancelButton = findViewById(R.id.cancelButton);
         commentContainer = findViewById(R.id.commentContainer);
+        avatar = findViewById(R.id.avatar);
+
+        avatar.setColorFilter(Utilities.getColorOfString(MainActivity.username));
 
         commentEdit.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -166,23 +179,6 @@ public class InfoPlaceActivity extends AppCompatActivity {
             }
         });
 
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMsg();
-            }
-        });
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager) InfoPlaceActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                getCurrentFocus().clearFocus();
-                commentEdit.setText("");
-            }
-        });
-
         KeyboardUtils.addKeyboardToggleListener(InfoPlaceActivity.this, new KeyboardUtils.SoftKeyboardToggleListener() {
             @Override
             public void onToggleSoftKeyboard(boolean b) {
@@ -193,14 +189,6 @@ public class InfoPlaceActivity extends AppCompatActivity {
                     } catch (NullPointerException ignore) {
                     }
                 }
-            }
-        });
-
-        commentEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) buttonLayout.setVisibility(View.VISIBLE);
-                else buttonLayout.setVisibility(View.INVISIBLE);
             }
         });
 

@@ -36,9 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mikhail.help.util.FocusedPlace;
 import com.example.mikhail.help.util.NameHelper;
-import com.example.mikhail.help.util.MapAutocompleteAdapter;
 import com.example.mikhail.help.util.Place;
 import com.example.mikhail.help.util.PlaceAutocompleteAdapter;
 import com.example.mikhail.help.util.Utilities;
@@ -48,6 +46,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String NAME = "name";
     private final String TAG = "MainActivity";
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -55,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_ACCOUNT = 2;
     public boolean mLocationPermissionGranted = false;
     protected GeoDataClient mGeoDataClient;
-    private final static String NAME = "name";
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
     private DrawerLayout mDrawerLayout;
@@ -64,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide;
     private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
     private TextView mNameView;
+    public static String username;
     private PlaceAutocompleteAdapter mAdapter;
 
 
@@ -77,6 +76,15 @@ public class MainActivity extends AppCompatActivity {
 
         return networkInfo != null && networkInfo.isConnected();
 
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @Override
@@ -125,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //-------------TOOLBAR-------------
+
     private void elementsLoad() {
         Log.d(TAG, "elementsLoad: calls");
         mNameEditLayout = findViewById(R.id.nameEditLayout);
@@ -145,8 +155,6 @@ public class MainActivity extends AppCompatActivity {
         mFabTextSide = findViewById(R.id.fabTextSide);
         mNameView = findViewById(R.id.name);
     }
-
-    //-------------TOOLBAR-------------
 
     private void elementsSetListeners() {
         Log.d(TAG, "elementsSetListeners: calls");
@@ -297,15 +305,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        View view = activity.getCurrentFocus();
-        if (view == null) {
-            view = new View(activity);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
     private void searchClose(AutoCompleteTextView textView, ImageView imageView) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(1, 0);
@@ -391,20 +390,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void showName(String name) {
         mNameEditLayout.setEnabled(true);
-        StringBuilder formattedName = new StringBuilder();
-        try {
-            for (String s : name.split("_")) {
-                if (s.length() > 1) {
-                    formattedName.append(String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1));
-                } else {
-                    formattedName.append(s.toUpperCase());
-                }
-            }
-            mNameView.setText(formattedName);
-        } catch (Exception e) {
-            Log.d(TAG, "onNickFormatting: formatting error! " + e.toString());
-            mNameView.setText(name);
-        }
+        username = Utilities.formatName(name);
+        mNameView.setText(username);
     }
 
     private void showNameLoading() {

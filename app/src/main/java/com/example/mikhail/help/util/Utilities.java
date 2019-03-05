@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -16,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.widget.TextView;
@@ -44,6 +46,11 @@ public final class Utilities {
         } else {
             return OK;
         }
+    }
+
+    public static int getColorOfString(String s) {
+        int r = s.hashCode() % 170 + 50, g = (s.hashCode() * 2) % 170 + 50, b = (s.hashCode() * 3) % 170 + 50;
+        return Color.rgb(r, g, b);
     }
 
     public static Calendar parseDateFromString(String dateStr) {
@@ -240,6 +247,23 @@ public final class Utilities {
         srcBitmap.recycle();
 
         return dstBitmap;
+    }
+
+    public static String formatName(String name) {
+        StringBuilder formattedName = new StringBuilder();
+        try {
+            for (String s : name.split("_")) {
+                if (s.length() > 1) {
+                    formattedName.append(String.valueOf(s.charAt(0)).toUpperCase() + s.substring(1));
+                } else {
+                    formattedName.append(s.toUpperCase());
+                }
+            }
+            return formattedName.toString();
+        } catch (Exception e) {
+            Log.d(TAG, "onNickFormatting: formatting error! " + e.toString());
+            return name;
+        }
     }
 
     public static void saveBitmap(Bitmap bitmap, String path) {
