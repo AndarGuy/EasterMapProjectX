@@ -1,14 +1,18 @@
 package com.example.mikhail.help;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -109,6 +113,39 @@ public class InfoPlaceActivity extends AppCompatActivity {
         MapHandler.isInfoActivityOpen = false;
         finish();
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.app_bar_menu, menu);
+
+        int dp8 = Utilities.getPxFromDp(8, this), dp16 = Utilities.getPxFromDp(16, this);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        LinearLayout linearLayout = (LinearLayout) searchItem.getActionView();
+        final ImageView imageView = new ImageView(this);
+
+        LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        imageLayoutParams.gravity = Gravity.CENTER;
+        imageLayoutParams.setMarginEnd(dp16);
+        imageLayoutParams.setMarginStart(dp16);
+
+        imageView.setLayoutParams(imageLayoutParams);
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_share));
+        imageView.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.interesting_place) + " " + name.getText());
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, description.getText() + "\n" + getString(R.string.download_app));
+                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
+            }
+        });
+        linearLayout.addView(imageView);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void sendMsg() {

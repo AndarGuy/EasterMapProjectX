@@ -22,9 +22,13 @@ import android.util.Patterns;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import com.example.mikhail.help.R;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -247,6 +251,16 @@ public final class Utilities {
         srcBitmap.recycle();
 
         return dstBitmap;
+    }
+
+    public static String formatDistance(Float distance, Context context) {
+        if (distance < 1000) {
+            return String.format("%s %s", Math.round(distance), context.getString(R.string.meters));
+        } else {
+            distance /= 1000;
+            distance = BigDecimal.valueOf(distance).setScale(1, RoundingMode.UP).floatValue();
+            return String.format("%s %s", distance, context.getString(R.string.kilometers));
+        }
     }
 
     public static String formatName(String name) {

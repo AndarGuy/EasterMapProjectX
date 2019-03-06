@@ -71,8 +71,9 @@ public class RetrofitRequest {
                     HashMap<String, String> map = gson.fromJson(gson.toJson(response.body()), HashMap.class);
                     Integer result = Integer.valueOf(map.get(RESULT));
                     listener.onResponse(call, map, result);
-                } catch (JsonSyntaxException | IllegalStateException | NullPointerException e) {
-                    Log.d(TAG, "ERROR: " + response.body());
+                } catch (Exception e) {
+                    Log.d(TAG, "ERROR: " + e.getClass().getName() + " BODY: " + response.body());
+                    e.printStackTrace();
                 }
             }
 

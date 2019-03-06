@@ -140,6 +140,9 @@
 
     <string name="event_finished">The event has been finished</string>
     <string name="join">Join</string>
+    <string name="share_via">Share via</string>
+    <string name="download_app">Download: \'link\' to see this and more different places!</string>
+    <string name="interesting_place">Interesting place:</string>
 
 
 </resources>

@@ -40,7 +40,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
             TYPE = "type",
             DESCRIPTION = "description",
             NAME = "new_name",
-            PLACE = "place",
+            PLACE = "mPlace",
             ADD = "add",
             EMAIL = "email",
             PASSWORD = "password";
@@ -193,7 +193,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                             @Override
                             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                                 if (result == OK) {
-                                    Log.d(TAG, "onResponse: place added");
+                                    Log.d(TAG, "onResponse: mPlace added");
                                     Toast.makeText(AddPlaceActivity.this, getString(R.string.place_added), Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.d(TAG, "onResponse: error: " + result);
@@ -203,7 +203,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
 
                             @Override
                             public void onFailure(Call<Object> call, Throwable t) {
-                                Log.d(TAG, "onFailure: adding place error: " + t.toString());
+                                Log.d(TAG, "onFailure: adding mPlace error: " + t.toString());
                                 Toast.makeText(AddPlaceActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
                             }
                         });

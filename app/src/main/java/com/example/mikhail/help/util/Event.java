@@ -9,6 +9,21 @@ import java.util.Calendar;
 
 public class Event {
     public static final int STATE_PAST = 0, STATE_SIMPLE = 1, STATE_FUTURE = 2, STATE_UNKNOWN = -1;
+    public static final String
+            STATE = "state",
+            EVENT = "event",
+            START_DATE = "start_date",
+            END_DATE = "end_date",
+            SIZE = "size",
+            DESCRIPTION = "description",
+            NAME = "name",
+            IMAGE = "image",
+            INFO = "info",
+            ID = "id",
+            LONGITUDE = "longitude",
+            LATITUDE = "latitude",
+            GET = "get";
+
     private String id;
     private Integer size;
     private LatLng location;

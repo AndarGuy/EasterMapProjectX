@@ -138,5 +138,8 @@
     <string name="event_adding_error">Не удалось добавить событие!</string>
     <string name="event_finished">Событие закончилось</string>
     <string name="join">Присоединиться</string>
+    <string name="share_via">Поделиться</string>
+    <string name="download_app">Скачай приложение: \'ссылка\', чтобы посмотреть это и другие интересные места!</string>
+    <string name="interesting_place">Интересное место:</string>
 
 </resources>

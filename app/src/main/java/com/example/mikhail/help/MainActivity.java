@@ -177,7 +177,12 @@ public class MainActivity extends AppCompatActivity {
         });
         mDrawerLayout.addDrawerListener(mBarDrawerToggle);
         mProfileImageContainer.setOnClickListener(listener.onClickProfileImage);
-        mFindsLayout.setOnClickListener(listener.onClickItemDrawerMenu);
+        mFindsLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), NearActivity.class));
+            }
+        });
         mShopLayout.setOnClickListener(listener.onClickItemDrawerMenu);
         mAccountManageLayout.setOnClickListener(new View.OnClickListener() {
             @Override

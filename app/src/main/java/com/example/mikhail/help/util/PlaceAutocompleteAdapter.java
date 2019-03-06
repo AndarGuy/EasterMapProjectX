@@ -94,13 +94,7 @@ public class PlaceAutocompleteAdapter extends BaseAdapter implements Filterable 
             textView2.setText(place.getId());
         } else {
             float distance = placeLocation.distanceTo(myLocation);
-            if (distance < 1000) {
-                textView2.setText(String.format("%s %s", Math.round(distance), mContext.getString(R.string.meters)));
-            } else {
-                distance /= 1000;
-                distance = BigDecimal.valueOf(distance).setScale(1, RoundingMode.UP).floatValue();
-                textView2.setText(String.format("%s %s", distance, mContext.getString(R.string.kilometers)));
-            }
+            textView2.setText(Utilities.formatDistance(distance, mContext));
         }
 
         return convertView;

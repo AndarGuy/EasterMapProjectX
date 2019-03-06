@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class FocusedPlace extends Place {
 
@@ -55,13 +56,17 @@ public class FocusedPlace extends Place {
     }
 
     public void setImage(Bitmap image, Context context) {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
-        String imageFileName = "LOCATION_IMAGE_" + timeStamp;
+        String imageFileName = "LOCATION_IMAGE_" + UUID.randomUUID().toString();
         File storageDir = context.getObbDir();
         String path = storageDir.getAbsolutePath() + "/" + imageFileName;
         Utilities.saveBitmap(image, path);
         this.imagePath = path;
         this.image = image;
+    }
+
+    public boolean removeImage() {
+        File image = new File(this.imagePath);
+        return image.delete();
     }
 
     public GroundOverlay getOverlay() {

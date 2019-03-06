@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -70,29 +69,12 @@ public class MapHandler implements OnMapReadyCallback {
     private static final String ANIMATED_MOVE = "Animated";
     private static final String DEFAULT_MOVE = "Default";
     private static final int OK = 0;
-    public static Location location;
-    static boolean isInfoActivityOpen;
-    private final String
-            ICON = "icon",
-            STATE = "state",
-            EVENT = "event",
-            DESCRIPTION = "description",
-            NAME = "name",
-            IMAGE = "image",
-            START_DATE = "start_date",
-            END_DATE = "end_date",
-            SIZE = "size",
-            INFO = "info",
-            TYPE = "type",
-            ID = "id",
-            TO_Y = "to_y",
+    private static final String TO_Y = "to_y",
             TO_X = "to_x",
             FROM_Y = "from_y",
-            FROM_X = "from_x",
-            LONGITUDE = "longitude",
-            LATITUDE = "latitude",
-            PLACE = "place",
-            GET = "get";
+            FROM_X = "from_x";
+    public static Location location;
+    static boolean isInfoActivityOpen;
     private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
             R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
             R.drawable.ic_egg_easter};
@@ -214,7 +196,7 @@ public class MapHandler implements OnMapReadyCallback {
                 LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
                 final Double x1 = farLeft.latitude, y1 = farLeft.longitude, x2 = nearRight.latitude, y2 = nearRight.longitude;
 
-                final RetrofitRequest request = new RetrofitRequest(PLACE, GET);
+                final RetrofitRequest request = new RetrofitRequest(Place.PLACE, Place.GET);
                 request.putParam(FROM_X, x1.toString());
                 request.putParam(FROM_Y, y1.toString());
                 request.putParam(TO_X, x2.toString());
@@ -227,7 +209,7 @@ public class MapHandler implements OnMapReadyCallback {
                             Gson gson = new Gson();
                             for (int i = 0; i < response.keySet().size() - 1; i++) {
                                 HashMap<String, String> tempPlace = gson.fromJson(gson.toJson(response.get(String.valueOf(i))), HashMap.class);
-                                Place currentPlace = new Place(tempPlace.get(ID), tempPlace.get(TYPE), Double.valueOf(tempPlace.get(LATITUDE)), Double.valueOf(tempPlace.get(LONGITUDE)));
+                                Place currentPlace = new Place(tempPlace.get(Place.ID), tempPlace.get(Place.TYPE), Double.valueOf(tempPlace.get(Place.LATITUDE)), Double.valueOf(tempPlace.get(Place.LONGITUDE)));
                                 VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
                                 LatLng nearRight = visibleRegion.nearRight, farLeft = visibleRegion.farLeft;
                                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
@@ -251,7 +233,7 @@ public class MapHandler implements OnMapReadyCallback {
                 });
                 request.makeRequest();
 
-                final RetrofitRequest request1 = new RetrofitRequest(EVENT, GET);
+                final RetrofitRequest request1 = new RetrofitRequest(Event.EVENT, Event.GET);
                 request1.putParam(FROM_X, x1.toString());
                 request1.putParam(FROM_Y, y1.toString());
                 request1.putParam(TO_X, x2.toString());
@@ -267,10 +249,10 @@ public class MapHandler implements OnMapReadyCallback {
                             for (int i = 0; i < response.keySet().size() - 1; i++) {
                                 HashMap<String, String> tempEvent = gson.fromJson(gson.toJson(response.get(String.valueOf(i))), HashMap.class);
 
-                                String startDateStr = tempEvent.get(START_DATE), endDateStr = tempEvent.get(END_DATE);
+                                String startDateStr = tempEvent.get(Event.START_DATE), endDateStr = tempEvent.get(Event.END_DATE);
                                 Calendar startDate = Utilities.parseDateFromString(startDateStr), endDate = Utilities.parseDateFromString(endDateStr);
 
-                                Event currentEvent = new Event(tempEvent.get(ID), Integer.valueOf(tempEvent.get(SIZE)), startDate, endDate, Double.valueOf(tempEvent.get(LATITUDE)), Double.valueOf(tempEvent.get(LONGITUDE)));
+                                Event currentEvent = new Event(tempEvent.get(Event.ID), Integer.valueOf(tempEvent.get(Event.SIZE)), startDate, endDate, Double.valueOf(tempEvent.get(Event.LATITUDE)), Double.valueOf(tempEvent.get(Event.LONGITUDE)));
 
                                 if (!showingEvents.keySet().contains(currentEvent.getId())) {
 
@@ -377,7 +359,7 @@ public class MapHandler implements OnMapReadyCallback {
                     }
                     return true;
                 }
-                RetrofitRequest request = new RetrofitRequest(PLACE, INFO);
+                RetrofitRequest request = new RetrofitRequest(Place.PLACE, Place.INFO);
 
                 moveCameraToPosition(marker.getPosition(), mMap.getCameraPosition().zoom);
 
@@ -391,13 +373,13 @@ public class MapHandler implements OnMapReadyCallback {
                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
                 placeOpen(Double.valueOf(x1 - x2).floatValue(), focusedPlace);
 
-                request.putParam(ID, focusedPlace.getId());
+                request.putParam(Place.ID, focusedPlace.getId());
                 request.setListener(new RequestListener() {
                     @Override
                     public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                         if (result == OK) {
-                            Bitmap image = Utilities.decodeBase64(response.get(IMAGE));
-                            String name = response.get(NAME), description = response.get(DESCRIPTION);
+                            Bitmap image = Utilities.decodeBase64(response.get(Place.IMAGE));
+                            String name = response.get(Place.NAME), description = response.get(Place.DESCRIPTION);
                             Bitmap crop;
                             if (image.getHeight() > image.getWidth())
                                 crop = Bitmap.createBitmap(image, 0, image.getHeight() / 2 - image.getWidth() / 2, image.getWidth(), image.getWidth());
@@ -521,13 +503,13 @@ public class MapHandler implements OnMapReadyCallback {
 
         Intent intent = new Intent(context, InfoPlaceActivity.class);
 
-        intent.putExtra(ID, focusedPlace.getId());
-        intent.putExtra(NAME, focusedPlace.getName());
-        intent.putExtra(DESCRIPTION, focusedPlace.getDescription());
-        intent.putExtra(IMAGE, focusedPlace.getImagePath());
-        intent.putExtra(ICON, iconByType.get(focusedPlace.getType()));
-        intent.putExtra(LATITUDE, focusedPlace.getLatitude());
-        intent.putExtra(LONGITUDE, focusedPlace.getLongitude());
+        intent.putExtra(Place.ID, focusedPlace.getId());
+        intent.putExtra(Place.NAME, focusedPlace.getName());
+        intent.putExtra(Place.DESCRIPTION, focusedPlace.getDescription());
+        intent.putExtra(Place.IMAGE, focusedPlace.getImagePath());
+        intent.putExtra(Place.ICON, iconByType.get(focusedPlace.getType()));
+        intent.putExtra(Place.LATITUDE, focusedPlace.getLatitude());
+        intent.putExtra(Place.LONGITUDE, focusedPlace.getLongitude());
 
 
         context.startActivity(intent);
@@ -538,13 +520,13 @@ public class MapHandler implements OnMapReadyCallback {
         isInfoActivityOpen = true;
 
         Intent intent = new Intent(context, InfoEventActivity.class);
-        intent.putExtra(ID, event.getId());
-        intent.putExtra(STATE, event.getState());
-        intent.putExtra(START_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getStartDate()));
-        intent.putExtra(END_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getEndDate()));
-        intent.putExtra(SIZE, event.getSize());
-        intent.putExtra(LATITUDE, event.getLatitude());
-        intent.putExtra(LONGITUDE, event.getLongitude());
+        intent.putExtra(Event.ID, event.getId());
+        intent.putExtra(Event.STATE, event.getState());
+        intent.putExtra(Event.START_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getStartDate()));
+        intent.putExtra(Event.END_DATE, DateFormat.format("d MMMM yyyy, HH:mm", event.getEndDate()));
+        intent.putExtra(Event.SIZE, event.getSize());
+        intent.putExtra(Event.LATITUDE, event.getLatitude());
+        intent.putExtra(Event.LONGITUDE, event.getLongitude());
 
         context.startActivity(intent);
     }
