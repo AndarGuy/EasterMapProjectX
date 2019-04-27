@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mikhail.help.R;
+import com.example.mikhail.help.RoutesActivity;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 
@@ -99,12 +100,13 @@ public class RoutesAdapter implements ListAdapter {
         LinearLayout goalsImageConstructor = routeExtend.findViewById(R.id.goalsImageConstructor);
 
 
-        SQLiteDatabase routesDB = context.openOrCreateDatabase("app.db", MODE_PRIVATE, null);
+        final SQLiteDatabase routesDB = context.openOrCreateDatabase("app.db", MODE_PRIVATE, null);
         routesDB.execSQL("CREATE TABLE IF NOT EXISTS routes (id INT, places VARCHAR(200), stage INT)");
 
         Cursor cursor = routesDB.query("routes", new String[]{"stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
         int stage = 0;
         if (cursor.moveToFirst()) stage = cursor.getInt(cursor.getColumnIndex("stage"));
+        cursor.close();
         int placesCount = route.getPlaces().length;
 
         for (int i = 0; i < placesCount; i++) {
@@ -170,18 +172,30 @@ public class RoutesAdapter implements ListAdapter {
             @Override
             public void onClick(View v) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                if (preferences.contains(ROUTE_NOW) && preferences.getString(ROUTE_NOW, "").equals(String.valueOf(route.getId()))) {
+                if (preferences.contains(ROUTE_NOW) && preferences.getInt(ROUTE_NOW, -1) == route.getId()) {
                     Toast.makeText(context, R.string.you_already_choosen_this, Toast.LENGTH_LONG).show();
                     return;
                 }
-                preferences.edit().putString(ROUTE_NOW, String.valueOf(route.getId())).apply();
 
-                ContentValues row = new ContentValues();
-                row.put("id", route.getId());
-                row.put("places", TextUtils.join(";", route.getPlaces()));
-                row.put("stage", 1);
+                preferences.edit().putInt(ROUTE_NOW, route.getId()).apply();
 
+                Cursor cursor = routesDB.query("routes", new String[]{"places", "stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
 
+                int stage = 1;
+
+                if (cursor.moveToFirst()) {
+                    stage = cursor.getInt(cursor.getColumnIndex("stage"));
+                } else {
+                    ContentValues row = new ContentValues();
+                    row.put("id", route.getId());
+                    row.put("places", TextUtils.join(";", route.getPlaces()));
+                    row.put("stage", stage);
+
+                    routesDB.insert("routes", null, row);
+                }
+                cursor.close();
+
+                ((RoutesActivity) context).setCurrentGoal(route.getId());
             }
         });
 

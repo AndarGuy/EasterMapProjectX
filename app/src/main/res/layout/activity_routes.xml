@@ -35,30 +35,40 @@
         android:layout_marginTop="56dp"
         tools:listitem="@layout/route_item" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/noGoal"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
-        android:gravity="center"
-        android:elevation="6dp">
+        android:elevation="6dp"
+        android:gravity="center">
+
         <TextView
+            android:id="@+id/noGoalInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="Нет активных маршрутов"
-            android:textSize="12sp"
-            android:textColor="@color/lightGrey"/>
-    </LinearLayout>
+            android:textColor="@color/lightGrey"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/goalBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/currentGoal"
-        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
-        android:elevation="6dp">
+        android:elevation="6dp"
+        android:visibility="invisible">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/goalImage"
@@ -97,13 +107,14 @@
         </LinearLayout>
 
         <ImageButton
-            style="@style/Button.Border"
+            android:id="@+id/showGoal"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
+            android:background="@android:color/transparent"
             android:src="@drawable/ic_marker"
             android:tint="@color/colorAccent" />
 

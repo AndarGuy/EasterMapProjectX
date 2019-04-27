@@ -43,6 +43,8 @@ public class SplashActivity extends AppCompatActivity {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        preferences.edit().remove("route_now").apply();
+
         if (preferences.getBoolean(IS_FIRST_RUNNING, true)) {
             startActivity(new Intent(this, TutorialActivity.class));
             finish();
