@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/app_bar_main" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="64dp"
+        android:elevation="1dp">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="46dp"
+            android:layout_height="46dp" />
+
+        <ImageView
+            android:id="@+id/errorImage"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:rotation="45"
+            android:src="@drawable/ic_plus"
+            android:tint="@color/colorAccent"
+            android:visibility="invisible" />
+    </FrameLayout>
+
+    <ListView
+        android:id="@+id/routesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        tools:listitem="@layout/route_item" />
+
+    <LinearLayout
+        android:id="@+id/noGoal"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:gravity="center"
+        android:elevation="6dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Нет активных маршрутов"
+            android:textSize="12sp"
+            android:textColor="@color/lightGrey"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/currentGoal"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:elevation="6dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/goalImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/profile" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шишка возле ДК"
+                android:textColor="@color/darkGrey"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Текущая цель"
+                android:textColor="@color/darkGrey"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageButton
+            style="@style/Button.Border"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_marker"
+            android:tint="@color/colorAccent" />
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -16,15 +19,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mikhail.help.util.Message;
+import com.example.mikhail.help.util.Place;
 import com.example.mikhail.help.util.Utilities;
 import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.rw.keyboardlistener.KeyboardUtils;
 
@@ -62,8 +68,9 @@ public class InfoPlaceActivity extends AppCompatActivity {
     private LinearLayout commentContainer;
     private TextView description, name;
     private ImageView image, icon;
-    private String imagePath;
+    private String imagePath, id;
     private CircleImageView avatar;
+    private FloatingActionButton showOnMap;
 
     private void setupToolbar() {
         Toolbar myToolbar = findViewById(R.id.toolbar);
@@ -195,6 +202,9 @@ public class InfoPlaceActivity extends AppCompatActivity {
         description = findViewById(R.id.descriptionText);
         image = findViewById(R.id.myImage);
         icon = findViewById(R.id.iconImage);
+
+        showOnMap = findViewById(R.id.showOnMapButton);
+
         commentEdit = findViewById(R.id.comment);
         commentContainer = findViewById(R.id.commentContainer);
         avatar = findViewById(R.id.avatar);
@@ -219,7 +229,6 @@ public class InfoPlaceActivity extends AppCompatActivity {
         KeyboardUtils.addKeyboardToggleListener(InfoPlaceActivity.this, new KeyboardUtils.SoftKeyboardToggleListener() {
             @Override
             public void onToggleSoftKeyboard(boolean b) {
-                Log.d(TAG, "onToggleSoftKeyboard: eseges");
                 if (!b) {
                     try {
                         getCurrentFocus().clearFocus();
@@ -229,11 +238,60 @@ public class InfoPlaceActivity extends AppCompatActivity {
             }
         });
 
-        name.setText(getIntent().getExtras().getString(NAME));
-        description.setText(getIntent().getExtras().getString(DESCRIPTION));
-        imagePath = getIntent().getExtras().getString(IMAGE);
+        id = getIntent().getExtras().getString(Place.ID);
+        imagePath = getIntent().getExtras().getString(Place.IMAGE);
         image.setImageBitmap(BitmapFactory.decodeFile(imagePath));
-        icon.setImageBitmap(Utilities.getBitmapFromVectorDrawable(this, getIntent().getExtras().getInt(ICON)));
+
+        String[] params = {Place.NAME, Place.DESCRIPTION, Place.TYPE, Place.LONGITUDE, Place.LATITUDE};
+
+        RetrofitRequest infoRequest = new RetrofitRequest(Place.PLACE, Place.GET_INFO);
+
+        infoRequest.putParam(Place.ID, id);
+        infoRequest.putParam(Place.PARAMS, TextUtils.join("|", params));
+
+        infoRequest.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, final HashMap<String, String> response, Integer result) {
+                name.setText(response.get(Place.NAME));
+                description.setText(response.get(Place.DESCRIPTION));
+                icon.setImageBitmap(Utilities.drawableToBitmap(getResources().getDrawable(Utilities.getIconId(response.get(Place.TYPE)), null)));
+
+                showOnMap.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MapHandler.moveCameraToPosition(new LatLng(Double.valueOf(response.get(Place.LATITUDE)), Double.valueOf(response.get(Place.LONGITUDE))), 15f);
+                        setResult(RESULT_OK, null);
+                        finish();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+
+            }
+        });
+
+        infoRequest.makeRequest();
+
+        RetrofitRequest imageRequest = new RetrofitRequest(Place.PLACE, Place.GET_IMAGE);
+
+        imageRequest.putParam(Place.ID, id);
+        imageRequest.putParam(Place.IMAGE_SIZE, Place.M_SIZE);
+
+        imageRequest.setListener(new RequestListener() {
+            @Override
+            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                image.setImageBitmap(Utilities.decodeBase64(response.get(Place.IMAGE)));
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+
+            }
+        });
+
+        imageRequest.makeRequest();
 
         updateComments();
     }

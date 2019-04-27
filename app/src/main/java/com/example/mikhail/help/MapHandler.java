@@ -19,6 +19,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.mikhail.help.util.BlurBuilder;
 import com.example.mikhail.help.util.Event;
 import com.example.mikhail.help.util.FocusedPlace;
 import com.example.mikhail.help.util.Place;
@@ -80,7 +81,7 @@ public class MapHandler implements OnMapReadyCallback {
             R.drawable.ic_egg_easter};
     private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
     private final HashMap<String, Integer> iconByType = new HashMap<>();
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
         public void onMyLocationClick(@NonNull Location location) {
@@ -359,7 +360,7 @@ public class MapHandler implements OnMapReadyCallback {
                     }
                     return true;
                 }
-                RetrofitRequest request = new RetrofitRequest(Place.PLACE, Place.INFO);
+                RetrofitRequest request = new RetrofitRequest(Place.PLACE, Place.GET_IMAGE);
 
                 moveCameraToPosition(marker.getPosition(), mMap.getCameraPosition().zoom);
 
@@ -374,26 +375,24 @@ public class MapHandler implements OnMapReadyCallback {
                 placeOpen(Double.valueOf(x1 - x2).floatValue(), focusedPlace);
 
                 request.putParam(Place.ID, focusedPlace.getId());
+                request.putParam(Place.IMAGE_SIZE, Place.S_SIZE);
                 request.setListener(new RequestListener() {
                     @Override
                     public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                         if (result == OK) {
                             Bitmap image = Utilities.decodeBase64(response.get(Place.IMAGE));
-                            String name = response.get(Place.NAME), description = response.get(Place.DESCRIPTION);
                             Bitmap crop;
                             if (image.getHeight() > image.getWidth())
                                 crop = Bitmap.createBitmap(image, 0, image.getHeight() / 2 - image.getWidth() / 2, image.getWidth(), image.getWidth());
                             else
                                 crop = Bitmap.createBitmap(image, image.getWidth() / 2 - image.getHeight() / 2, 0, image.getHeight(), image.getHeight());
-
                             Bitmap scaled = Bitmap.createScaledBitmap(crop, 300, 300, false);
-                            Bitmap circled = Utilities.getCircledBitmap(scaled);
-                            Bitmap circledWithBorders = Utilities.addBorderToRoundedBitmap(circled, 150, 15, Color.WHITE);
+                            Bitmap blurredBitmap = BlurBuilder.blur(context, scaled);
+                            Bitmap circled = Utilities.getCircledBitmap(blurredBitmap);
+                            Bitmap circledWithBorders = Utilities.addBorderToRoundedBitmap(circled, 150, 10, Color.WHITE);
                             try {
                                 focusedPlace.getOverlay().setImage(BitmapDescriptorFactory.fromBitmap(circledWithBorders));
                                 focusedPlace.setImage(image, context);
-                                focusedPlace.setDescription(description);
-                                focusedPlace.setName(name);
                             } catch (Exception e) {
                                 unfocusedPlace();
                             }
@@ -532,7 +531,7 @@ public class MapHandler implements OnMapReadyCallback {
     }
 
 
-    public void moveCameraToPosition(LatLng position, float zoom) {
+    public static void moveCameraToPosition(LatLng position, float zoom) {
         CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(zoom).build();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
         mMap.animateCamera(cameraUpdate);

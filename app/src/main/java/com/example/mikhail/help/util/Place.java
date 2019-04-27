@@ -13,7 +13,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Arrays;
 
 public class Place {
-    public static final String STEP = "step",
+    public static final String PARAMS = "params",
+            GET_INFO = "get_info",
+            L_SIZE = "L",
+            S_SIZE = "S",
+            M_SIZE = "M",
+            IMAGE_SIZE = "size",
+            GET_IMAGE = "get_image",
+            STEP = "step",
             NEAR = "near",
             ICON = "icon",
             DESCRIPTION = "description",

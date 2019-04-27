@@ -6,6 +6,7 @@
     <string name="press_to_edit">Press to edit</string>
     <string name="map">Map</string>
     <string name="my_finds">My finds</string>
+    <string name="routes">Routes</string>
     <string name="shop">Shop</string>
     <string name="account_manage">Account management</string>
     <string name="settings">Settings</string>
@@ -144,5 +145,6 @@
     <string name="download_app">Download: \'link\' to see this and more different places!</string>
     <string name="interesting_place">Interesting place:</string>
 
+    <string name="you_already_choosen_this">You have choosen this already!</string>
 
 </resources>

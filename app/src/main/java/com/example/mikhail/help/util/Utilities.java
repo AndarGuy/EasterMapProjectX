@@ -25,16 +25,23 @@ import android.widget.TextView;
 import com.example.mikhail.help.R;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public final class Utilities {
 
     private static final String TAG = "Utilities";
+
+    private static final int[] mIconIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
+            R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
+            R.drawable.ic_egg_easter};
+    private static final String[] mIconTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
 
     private static final int
             INVALID_EMAIL = 2,
@@ -50,6 +57,10 @@ public final class Utilities {
         } else {
             return OK;
         }
+    }
+
+    public static int getIconId(String type) {
+        return mIconIds[Arrays.asList(mIconTypes).indexOf(type)];
     }
 
     public static int getColorOfString(String s) {
@@ -126,6 +137,23 @@ public final class Utilities {
         textView.setTextColor(color);
         textView.setText(text);
     }
+
+    public static Bitmap getPlaceImage(String id, String size, Context context){
+        String imageFileName = "LOCATION_IMAGE_" + id + "_" + size;
+        File storageDir = context.getObbDir();
+        String path = storageDir.getAbsolutePath() + "/" + imageFileName;
+        if (new File(path).exists()) return BitmapFactory.decodeFile(path);
+        return null;
+    }
+
+    public static String getPlaceImagePath(String id, String size, Context context){
+        String imageFileName = "LOCATION_IMAGE_" + id + "_" + size;
+        File storageDir = context.getObbDir();
+        String path = storageDir.getAbsolutePath() + "/" + imageFileName;
+        if (new File(path).exists()) return path;
+        return null;
+    }
+
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableId);

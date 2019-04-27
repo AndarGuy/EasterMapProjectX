@@ -1,8 +1,10 @@
 package com.example.mikhail.help.additions;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -208,6 +210,8 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
                     else if (!DataEventFragment.isDatesOK)
                         shakeView(findViewById(R.id.chooseTimeLayout));
                     else {
+                        final ProgressDialog dialog = ProgressDialog.show(AddEventActivity.this, "", getString(R.string.loading),true);
+
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AddEventActivity.this);
                         RetrofitRequest request = new RetrofitRequest(EVENT, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
                         request.putParam(LATITUDE, String.valueOf(location.latitude));
@@ -226,17 +230,32 @@ public class AddEventActivity extends AppCompatActivity implements PositionFragm
                             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                                 if (result == OK) {
                                     Log.d(TAG, "onResponse: event added");
-                                    Toast.makeText(AddEventActivity.this, getString(R.string.event_added), Toast.LENGTH_SHORT).show();
+                                    dialog.setMessage(getString(R.string.event_added));
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            finish();
+                                        }}, 1000);
                                 } else {
                                     Log.d(TAG, "onResponse: error: " + result);
-                                    Toast.makeText(AddEventActivity.this, getString(R.string.event_adding_error), Toast.LENGTH_SHORT).show();
+                                    dialog.setMessage(getString(R.string.unknown_error) + " #" + result);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.cancel();
+                                        }}, 1000);
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<Object> call, Throwable t) {
                                 Log.d(TAG, "onFailure: adding event error: " + t.toString());
-                                Toast.makeText(AddEventActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
+                                dialog.setMessage(getString(R.string.unknown_error) + " " + t.toString());
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialog.cancel();
+                                    }}, 1000);
                             }
                         });
                         request.makeRequest();

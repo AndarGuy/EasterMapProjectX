@@ -56,7 +56,7 @@ public class FocusedPlace extends Place {
     }
 
     public void setImage(Bitmap image, Context context) {
-        String imageFileName = "LOCATION_IMAGE_" + UUID.randomUUID().toString();
+        String imageFileName = "LOCATION_IMAGE_" + getId();
         File storageDir = context.getObbDir();
         String path = storageDir.getAbsolutePath() + "/" + imageFileName;
         Utilities.saveBitmap(image, path);

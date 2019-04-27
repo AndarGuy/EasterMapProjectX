@@ -44,6 +44,8 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.SupportMapFragment;
 
+import okhttp3.Route;
+
 public class MainActivity extends AppCompatActivity {
 
     private final static String NAME = "name";
@@ -56,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
     protected GeoDataClient mGeoDataClient;
     MainListener listener;
     MapHandler mapHandler = new MapHandler(this);
-    private DrawerLayout mDrawerLayout;
+    public static DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mBarDrawerToggle;
-    private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
+    private LinearLayout mNameEditLayout, mProfileImageContainer, mFindsLayout, mRoutesLayout, mShopLayout, mAccountManageLayout, mSettingsLayout, mBugReportLayout;
     private FrameLayout mFabBackground, mFabPlaceSide, mFabEventSide, mFabTextSide;
     private FloatingActionButton mFab, mFabPlace, mFabText, mFabEvent;
     private TextView mNameView;
@@ -141,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = findViewById(R.id.drawerLayout);
         mProfileImageContainer = findViewById(R.id.profileImageLayout);
         mFindsLayout = findViewById(R.id.findsLayout);
+        mRoutesLayout = findViewById(R.id.routesLayout);
         mShopLayout = findViewById(R.id.shopLayout);
         mAccountManageLayout = findViewById(R.id.accountManageLayout);
         mSettingsLayout = findViewById(R.id.settingsLayout);
@@ -181,6 +184,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getBaseContext(), NearActivity.class));
+            }
+        });
+        mRoutesLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), RoutesActivity.class));
             }
         });
         mShopLayout.setOnClickListener(listener.onClickItemDrawerMenu);

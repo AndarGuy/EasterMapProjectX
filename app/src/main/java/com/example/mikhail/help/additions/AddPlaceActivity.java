@@ -1,8 +1,10 @@
 package com.example.mikhail.help.additions;
 
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -40,7 +42,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
             TYPE = "type",
             DESCRIPTION = "description",
             NAME = "new_name",
-            PLACE = "mPlace",
+            PLACE = "place",
             ADD = "add",
             EMAIL = "email",
             PASSWORD = "password";
@@ -180,7 +182,7 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                     else if (name == null) shakeView(findViewById(R.id.nameTextLayout));
                     else if (description == null || description.length() <= 0) shakeView(findViewById(R.id.descriptionInput));
                     else {
-                        Log.d(TAG, "onClick: " + name + " " + name.length());
+                        final ProgressDialog dialog = ProgressDialog.show(AddPlaceActivity.this, "", getString(R.string.loading),true);
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(AddPlaceActivity.this);
                         final RetrofitRequest request = new RetrofitRequest(PLACE, ADD, preferences.getString(EMAIL, null), preferences.getString(PASSWORD, null));
                         request.putParam(NAME, name);
@@ -194,21 +196,35 @@ public class AddPlaceActivity extends AppCompatActivity implements PositionFragm
                             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                                 if (result == OK) {
                                     Log.d(TAG, "onResponse: mPlace added");
-                                    Toast.makeText(AddPlaceActivity.this, getString(R.string.place_added), Toast.LENGTH_SHORT).show();
+                                    dialog.setMessage(getString(R.string.place_added));
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            finish();
+                                        }}, 1000);
                                 } else {
                                     Log.d(TAG, "onResponse: error: " + result);
-                                    Toast.makeText(AddPlaceActivity.this, getString(R.string.place_adding_error), Toast.LENGTH_SHORT).show();
+                                    dialog.setMessage(getString(R.string.unknown_error) + " #" + result);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.cancel();
+                                        }}, 1000);
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<Object> call, Throwable t) {
                                 Log.d(TAG, "onFailure: adding mPlace error: " + t.toString());
-                                Toast.makeText(AddPlaceActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
+                                dialog.setMessage(getString(R.string.unknown_error) + " " + t.toString());
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialog.cancel();
+                                    }}, 1000);
                             }
                         });
                         request.makeRequest();
-                        finish();
                     }
                 }
             }

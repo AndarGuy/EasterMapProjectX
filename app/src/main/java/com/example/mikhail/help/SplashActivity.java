@@ -21,6 +21,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.util.SharedPreferencesUtils;
 
+import java.io.File;
 import java.util.HashMap;
 
 import retrofit2.Call;
@@ -109,7 +110,6 @@ public class SplashActivity extends AppCompatActivity {
 
     private void userAuthorize() {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Log.d(TAG, "userAuthorize: " + preferences.getString(EMAIL, null) + " " + preferences.getString(PASSWORD, null));
         if (preferences.contains(PASSWORD) && preferences.contains(EMAIL)) {
             String email = preferences.getString(EMAIL, null), password = preferences.getString(PASSWORD, null);
             RetrofitRequest request = new RetrofitRequest(LOGIN, email, password);

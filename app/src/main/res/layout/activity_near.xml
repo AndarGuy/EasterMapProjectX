@@ -12,10 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        android:layout_marginTop="4dp"
         android:columnWidth="132dp"
         android:verticalSpacing="4dp"
-        android:numColumns="3"
+        android:numColumns="auto_fit"
         android:stretchMode="spacingWidth" />
 
     <TextView
