@@ -120,7 +120,18 @@ public class MainActivity extends AppCompatActivity {
 
         toolbarLoad();
 
-        showName(PreferenceManager.getDefaultSharedPreferences(this).getString(NAME, getString(R.string.loading)));
+        NameHelper.getName(MainActivity.this, new NameHelper.NameListener() {
+            @Override
+            public void onReturned(String name) {
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(NAME, name).apply();
+                showName(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(NAME, getString(R.string.loading)));
+            }
+
+            @Override
+            public void onFailed(Throwable t) {
+                showName(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(NAME, getString(R.string.loading)));
+            }
+        });
 
         elementsSetListeners();
 

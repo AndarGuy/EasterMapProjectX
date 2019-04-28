@@ -146,5 +146,10 @@
     <string name="interesting_place">Interesting place:</string>
 
     <string name="you_already_choosen_this">You have choosen this already!</string>
+    <string name="press_to_start">Press here to start the route</string>
+    <string name="active_route">Active route</string>
+    <string name="wow">Wow!</string>
+    <string name="you_reach_goal">You are reach the goal on the current route!</string>
+    <string name="finish_route">You are have been finished route! Сongratulation!</string>
 
 </resources>

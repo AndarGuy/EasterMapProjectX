@@ -143,5 +143,10 @@
     <string name="interesting_place">Интересное место:</string>
     <string name="routes">Маршруты</string>
     <string name="you_already_choosen_this">Вы уже выбрали это!</string>
+    <string name="press_to_start">Нажмите сюда, чтобы начать</string>
+    <string name="active_route">Активный маршрут</string>
+    <string name="wow">Ух-ты!</string>
+    <string name="you_reach_goal">Вы достигли цели текущего маршрута и стали на шаг ближе!</string>
+    <string name="finish_route">Вы завершили маршрут! Позравляем!</string>
 
 </resources>

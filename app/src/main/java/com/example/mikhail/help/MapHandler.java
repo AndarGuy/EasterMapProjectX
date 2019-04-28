@@ -2,9 +2,14 @@ package com.example.mikhail.help;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Address;
@@ -12,11 +17,16 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.mikhail.help.util.BlurBuilder;
@@ -28,7 +38,6 @@ import com.example.mikhail.help.web.RequestListener;
 import com.example.mikhail.help.web.RetrofitRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -62,6 +71,8 @@ import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class MapHandler implements OnMapReadyCallback {
 
     private static final String TAG = "MapHandler";
@@ -70,18 +81,24 @@ public class MapHandler implements OnMapReadyCallback {
     private static final String ANIMATED_MOVE = "Animated";
     private static final String DEFAULT_MOVE = "Default";
     private static final int OK = 0;
+    private final static String
+            ROUTE_NOW = "route_now",
+            CURRENT_GOAL_LONGITUDE = "current_goal_longitude",
+            CURRENT_GOAL_LATITIDE = "current_goal_latitude",
+            CURRENT_GOAL = "current_goal";
     private static final String TO_Y = "to_y",
             TO_X = "to_x",
             FROM_Y = "from_y",
             FROM_X = "from_x";
     public static Location location;
     static boolean isInfoActivityOpen;
+    private static GoogleMap mMap;
     private final int[] mThumbIds = {R.drawable.ic_gradient, R.drawable.ic_pillar, R.drawable.ic_video_vintage,
             R.drawable.ic_hills, R.drawable.ic_church, R.drawable.ic_building,
             R.drawable.ic_egg_easter};
     private final String[] mThumbTypes = {"GR", "MN", "PS", "MO", "CH", "EB", "EG"};
     private final HashMap<String, Integer> iconByType = new HashMap<>();
-    private static GoogleMap mMap;
+    SharedPreferences preferences;
     private GoogleMap.OnMyLocationClickListener onMyLocationClickListener = new GoogleMap.OnMyLocationClickListener() {
         @Override
         public void onMyLocationClick(@NonNull Location location) {
@@ -92,7 +109,6 @@ public class MapHandler implements OnMapReadyCallback {
         }
     };
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationCallback mLocationCallback;
     private Context context;
     private HashMap<String, Place> showingPlaces = new HashMap<>();
     private HashMap<String, Event> showingEvents = new HashMap<>();
@@ -101,6 +117,12 @@ public class MapHandler implements OnMapReadyCallback {
     MapHandler(Context context) {
         isInfoActivityOpen = false;
         this.context = context;
+    }
+
+    public static void moveCameraToPosition(LatLng position, float zoom) {
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(zoom).build();
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+        mMap.animateCamera(cameraUpdate);
     }
 
     @Override
@@ -162,20 +184,93 @@ public class MapHandler implements OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private void mapSetup() {
         Log.d(TAG, "mapSetup: setup starting");
-        LocationListener mListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-            }
-        };
+        LocationRequest mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setInterval(10000);
+
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-        mFusedLocationProviderClient.requestLocationUpdates(LocationRequest.create(), new LocationCallback() {
+        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                Log.d(TAG, "onLocationResult: " + locationResult.getLastLocation().getLatitude() + locationResult.getLastLocation().getLongitude());
+                Location goal = new Location(CURRENT_GOAL);
+                goal.setLatitude(preferences.getFloat(CURRENT_GOAL_LATITIDE, 0f));
+                goal.setLongitude(preferences.getFloat(CURRENT_GOAL_LONGITUDE, 0f));
+                if (locationResult.getLastLocation().distanceTo(goal) < 40) {
+
+                    int nowRouteId = preferences.getInt(ROUTE_NOW, -1);
+
+                    SQLiteDatabase routesDB = context.openOrCreateDatabase("app.db", MODE_PRIVATE, null);
+
+                    Cursor cursor = routesDB.query("routes", new String[]{"places", "stage"}, "id = ?", new String[]{String.valueOf(nowRouteId)}, null, null, null);
+                    if (!cursor.moveToFirst()) return;
+                    int stage = cursor.getInt(cursor.getColumnIndex("stage"));
+                    String[] places = cursor.getString(cursor.getColumnIndex("places")).split(";");
+                    cursor.close();
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AppTheme_Light));
+
+                    preferences.edit().putFloat(CURRENT_GOAL_LATITIDE, 0).putFloat(CURRENT_GOAL_LONGITUDE, 0).apply();
+
+                    if (stage + 1 < places.length) {
+                        builder.setTitle(R.string.wow)
+                                .setMessage(R.string.you_reach_goal)
+                                .setIcon(R.drawable.ic_celebration)
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.close,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                        RetrofitRequest infoRequest = new RetrofitRequest(Place.PLACE, Place.GET_INFO);
+                        String[] params = {Place.LATITUDE, Place.LONGITUDE};
+                        infoRequest.putParam(Place.ID, places[stage + 1]);
+                        infoRequest.putParam(Place.PARAMS, TextUtils.join("|", params));
+                        infoRequest.setListener(new RequestListener() {
+                            @Override
+                            public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
+                                final Double latitude = Double.valueOf(response.get(Place.LATITUDE)), longitude = Double.valueOf(response.get(Place.LONGITUDE));
+                                preferences.edit().putFloat(CURRENT_GOAL_LATITIDE, latitude.floatValue()).putFloat(CURRENT_GOAL_LONGITUDE, longitude.floatValue()).apply();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Object> call, Throwable t) {
+
+                            }
+                        });
+
+                        infoRequest.makeRequest();
+                    }
+                    else {
+                        builder.setTitle(R.string.wow)
+                                .setMessage(R.string.finish_route)
+                                .setIcon(R.drawable.ic_celebration)
+                                .setCancelable(true)
+                                .setNegativeButton(R.string.close,
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                        preferences.edit().remove("route_now").apply();
+                    }
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
+                    ContentValues row = new ContentValues();
+                    row.put("stage", stage + 1);
+
+                    routesDB.update("routes", row, "id" + "='" + nowRouteId + "'", null);
+
+
+                }
             }
         }, null);
+
         for (int i = 0; i < mThumbIds.length; i++)
             iconByType.put(mThumbTypes[i], mThumbIds[i]);
         mMap.getUiSettings().setRotateGesturesEnabled(false);
@@ -216,7 +311,10 @@ public class MapHandler implements OnMapReadyCallback {
                                 Double x1 = farLeft.latitude, x2 = nearRight.latitude;
                                 Double needDistance = (x1 - x2) * 30000f;
                                 if (!showingPlaces.keySet().contains(currentPlace.getId()) && Arrays.asList(mThumbTypes).contains(currentPlace.getType())) {
-                                    currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.darkGrey)));
+                                    if (preferences.getString(CURRENT_GOAL, "").equals(currentPlace.getId()))
+                                        currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.colorAccent)));
+                                    else
+                                        currentPlace.addMarker(mMap, Utilities.tintImage(Utilities.getBitmapFromVectorDrawable(context, iconByType.get(currentPlace.getType())), context.getResources().getColor(R.color.darkGrey)));
                                     currentPlace.getMarker().setAnchor(0.5f, 0.5f);
                                     if (focusedPlace != null && SphericalUtil.computeDistanceBetween(focusedPlace.getLocation(), currentPlace.getLocation()) < needDistance)
                                         focusedPlace.addHidedPlace(currentPlace);
@@ -528,13 +626,6 @@ public class MapHandler implements OnMapReadyCallback {
         intent.putExtra(Event.LONGITUDE, event.getLongitude());
 
         context.startActivity(intent);
-    }
-
-
-    public static void moveCameraToPosition(LatLng position, float zoom) {
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(position).zoom(zoom).build();
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-        mMap.animateCamera(cameraUpdate);
     }
 
     private void moveCameraToLocation(Location location, float zoom, String move) {

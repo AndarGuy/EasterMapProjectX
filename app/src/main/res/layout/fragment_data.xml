@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:overScrollMode="never"
     android:scrollbars="none"
-    tools:context=".additions.DataFragment">
+    tools:context=".additions.DataFragment"
+    android:background="@color/background">
 
     <LinearLayout
         android:id="@+id/container"

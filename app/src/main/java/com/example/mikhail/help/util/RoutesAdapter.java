@@ -3,6 +3,7 @@ package com.example.mikhail.help.util;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,6 +41,12 @@ public class RoutesAdapter implements ListAdapter {
     ArrayList<Route> routes;
     Context context;
     private boolean isRouteExtended = false;
+
+    private TextView nameView, descriptionView, goalsDescription;
+    private CircleImageView imageView;
+    private ImageView downButton;
+    private LinearLayout routeContainer, routeExtend;
+    private LinearLayout goalsImageConstructor;
 
     public RoutesAdapter(Context context, ArrayList<Route> routes) {
         this.context = context;
@@ -93,29 +100,88 @@ public class RoutesAdapter implements ListAdapter {
 
         View view = View.inflate(context, R.layout.route_item, null);
 
-        TextView nameView = view.findViewById(R.id.name), descriptionView = view.findViewById(R.id.description);
-        final CircleImageView imageView = view.findViewById(R.id.image);
-        final ImageView downButton = view.findViewById(R.id.downButton);
-        final LinearLayout routeContainer = view.findViewById(R.id.routeContainer), routeExtend = (LinearLayout) View.inflate(context, R.layout.route_item_extend, null);
-        LinearLayout goalsImageConstructor = routeExtend.findViewById(R.id.goalsImageConstructor);
+        nameView = view.findViewById(R.id.name);
+        descriptionView = view.findViewById(R.id.description);
+        imageView = view.findViewById(R.id.image);
+        downButton = view.findViewById(R.id.downButton);
+        routeContainer = view.findViewById(R.id.routeContainer);
+        routeExtend = (LinearLayout) View.inflate(context, R.layout.route_item_extend, null);
+        goalsImageConstructor = routeExtend.findViewById(R.id.goalsImageConstructor);
+        goalsDescription = routeExtend.findViewById(R.id.goalsDescription);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         final SQLiteDatabase routesDB = context.openOrCreateDatabase("app.db", MODE_PRIVATE, null);
         routesDB.execSQL("CREATE TABLE IF NOT EXISTS routes (id INT, places VARCHAR(200), stage INT)");
 
-        Cursor cursor = routesDB.query("routes", new String[]{"stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
+        final Cursor cursor = routesDB.query("routes", new String[]{"stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
+
         int stage = 0;
         if (cursor.moveToFirst()) stage = cursor.getInt(cursor.getColumnIndex("stage"));
-        cursor.close();
         int placesCount = route.getPlaces().length;
+
+        if (preferences.contains(ROUTE_NOW) && preferences.getInt(ROUTE_NOW, -1) == route.getId()) {
+            goalsDescription.setText(R.string.active_route);
+            routeContainer.addView(routeExtend);
+            downButton.animate().rotation(180);
+            isRouteExtended = !isRouteExtended;
+        } else if (cursor.moveToFirst() && cursor.getInt(cursor.getColumnIndex("stage")) == route.getPlaces().length) {
+            goalsDescription.setText(R.string.finish_route);
+            routeExtend.setClickable(false);
+        } else {
+            routeExtend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+                    Cursor cursor = routesDB.query("routes", new String[]{"places", "stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
+
+                    preferences.edit().putInt(ROUTE_NOW, route.getId()).apply();
+
+                    int stage = 0;
+
+                    if (cursor.moveToFirst()) {
+                        stage = cursor.getInt(cursor.getColumnIndex("stage"));
+                    } else {
+                        ContentValues row = new ContentValues();
+                        row.put("id", route.getId());
+                        row.put("places", TextUtils.join(";", route.getPlaces()));
+                        row.put("stage", stage);
+
+                        routesDB.insert("routes", null, row);
+                    }
+                    cursor.close();
+
+                    goalsImageConstructor.removeAllViews();
+
+                    for (int i = 0; i < route.getPlaces().length; i++) {
+                        ImageView temp = new ImageView(context);
+                        if (i < stage) temp.setImageResource(R.drawable.ic_visited_place);
+                        else temp.setImageResource(R.drawable.ic_not_visited_place);
+                        goalsImageConstructor.addView(temp);
+                        ImageView tempSep = new ImageView(context);
+                        tempSep.setImageResource(R.drawable.ic_route_place_connection);
+                        if (i < route.getPlaces().length - 1) goalsImageConstructor.addView(tempSep);
+                    }
+
+                    goalsDescription.setText(R.string.active_route);
+
+                    ((RoutesActivity) context).setCurrentGoal(route.getId());
+                }
+            });
+        }
+
+        cursor.close();
 
         for (int i = 0; i < placesCount; i++) {
             ImageView temp = new ImageView(context);
+            temp.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorAccent)));
             if (i < stage) temp.setImageResource(R.drawable.ic_visited_place);
             else temp.setImageResource(R.drawable.ic_not_visited_place);
             goalsImageConstructor.addView(temp);
             ImageView tempSep = new ImageView(context);
             tempSep.setImageResource(R.drawable.ic_route_place_connection);
+            tempSep.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.colorAccent)));
             if (i < placesCount - 1) goalsImageConstructor.addView(tempSep);
         }
 
@@ -168,36 +234,6 @@ public class RoutesAdapter implements ListAdapter {
             }
         });
 
-        routeExtend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                if (preferences.contains(ROUTE_NOW) && preferences.getInt(ROUTE_NOW, -1) == route.getId()) {
-                    Toast.makeText(context, R.string.you_already_choosen_this, Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                preferences.edit().putInt(ROUTE_NOW, route.getId()).apply();
-
-                Cursor cursor = routesDB.query("routes", new String[]{"places", "stage"}, "id = ?", new String[]{String.valueOf(route.getId())}, null, null, null);
-
-                int stage = 1;
-
-                if (cursor.moveToFirst()) {
-                    stage = cursor.getInt(cursor.getColumnIndex("stage"));
-                } else {
-                    ContentValues row = new ContentValues();
-                    row.put("id", route.getId());
-                    row.put("places", TextUtils.join(";", route.getPlaces()));
-                    row.put("stage", stage);
-
-                    routesDB.insert("routes", null, row);
-                }
-                cursor.close();
-
-                ((RoutesActivity) context).setCurrentGoal(route.getId());
-            }
-        });
 
         return view;
     }

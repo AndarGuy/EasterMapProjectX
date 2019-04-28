@@ -194,17 +194,6 @@ public class AuthorizationActivity extends AppCompatActivity {
                         editor.putString(PASSWORD, password);
                         editor.apply();
                         setResult(RESULT_OK);
-                        NameHelper.getName(AuthorizationActivity.this, new NameHelper.NameListener() {
-                            @Override
-                            public void onReturned(String name) {
-                                preferences.edit().putString(NAME, name).apply();
-                            }
-
-                            @Override
-                            public void onFailed(Throwable t) {
-
-                            }
-                        });
                         startActivity(new Intent(AuthorizationActivity.this, MainActivity.class));
                         finish();
                         break;

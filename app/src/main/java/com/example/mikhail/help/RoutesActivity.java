@@ -39,8 +39,6 @@ import retrofit2.Call;
 
 public class RoutesActivity extends AppCompatActivity {
 
-    private static final String ROUTE_NOW = "route_now";
-
     private ListView routesList;
     private ProgressBar progressBar;
     private ImageView errorImage;
@@ -51,17 +49,30 @@ public class RoutesActivity extends AppCompatActivity {
     private FrameLayout noGoal;
     private ImageButton showGoal;
 
+    private ArrayList<Route> routes;
+
+    private final static String
+            ROUTE_NOW = "route_now",
+            CURRENT_GOAL_LONGITUDE = "current_goal_longitude",
+            CURRENT_GOAL_LATITIDE = "current_goal_latitude",
+            CURRENT_GOAL = "current_goal";
+
 
     public void setCurrentGoal(int routeId) {
 
-        goalBar.setVisibility(View.VISIBLE);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (routes != null) routesList.setAdapter(new RoutesAdapter(RoutesActivity.this, routes));
+
         noGoalInfo.setVisibility(View.INVISIBLE);
 
         SQLiteDatabase routesDB = openOrCreateDatabase("app.db", MODE_PRIVATE, null);
         Cursor cursor = routesDB.query("routes", new String[]{"places", "stage"}, "id = ?", new String[]{String.valueOf(routeId)}, null, null, null);
         cursor.moveToFirst();
-        final String placeId = cursor.getString(cursor.getColumnIndex("places")).split(";")[cursor.getInt(cursor.getColumnIndex("stage")) - 1];
+        final String placeId = cursor.getString(cursor.getColumnIndex("places")).split(";")[cursor.getInt(cursor.getColumnIndex("stage"))];
         cursor.close();
+
+        preferences.edit().putString(CURRENT_GOAL, placeId).apply();
 
         RetrofitRequest infoRequest = new RetrofitRequest(Place.PLACE, Place.GET_INFO);
         String[] params = {Place.NAME, Place.LATITUDE, Place.LONGITUDE};
@@ -72,6 +83,7 @@ public class RoutesActivity extends AppCompatActivity {
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 title.setText(response.get(Place.NAME));
                 final Double latitude = Double.valueOf(response.get(Place.LATITUDE)), longitude = Double.valueOf(response.get(Place.LONGITUDE));
+                preferences.edit().putFloat(CURRENT_GOAL_LATITIDE, latitude.floatValue()).putFloat(CURRENT_GOAL_LONGITUDE, longitude.floatValue()).apply();
                 showGoal.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -155,7 +167,7 @@ public class RoutesActivity extends AppCompatActivity {
             public void onResponse(Call<Object> call, HashMap<String, String> response, Integer result) {
                 progressBar.setVisibility(View.INVISIBLE);
 
-                ArrayList<Route> routes = new ArrayList<>();
+                routes = new ArrayList<>();
 
                 Gson gson = new Gson();
                 for (int i = 0; i < response.keySet().size() - 1; i++) {
